@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr" class="no-js">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Canal Box{% endblock %}</title>
+  <meta name="description" content="Canal Box — Plateforme d'avis clients. Internet fibre, télévision et services numériques.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='26' fill='%23ff2d78'/%3E%3Ctext x='50' y='68' font-size='58' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'%3EC%3C/text%3E%3C/svg%3E">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pink: { DEFAULT: '#ff2d78', 600: '#e01f66', 400: '#ff5c95', 300: '#ff8fb6' },
+            ink: { DEFAULT: '#0a0a0c', 2: '#16161a' },
+          },
+          fontFamily: {
+            sans: ['Inter', 'Manrope', 'SF Pro Display', 'system-ui', 'sans-serif'],
+            display: ['Manrope', 'Inter', 'sans-serif'],
+          },
+          borderRadius: { '2.5xl': '20px', '3xl': '28px', '4xl': '36px' },
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="{% static 'css/canalbox.css' %}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  <script src="{% static 'js/canalbox.js' %}" defer></script>
+  {% block head_extra %}{% endblock %}
+</head>
+<body class="min-h-screen">
+  <div class="cb-canvas"></div>
+  <div class="cb-orb cb-orb--pink" style="top:-120px; left:-100px"></div>
+  <div class="cb-orb cb-orb--dark" style="bottom:-140px; right:-120px"></div>
+
+  {% include "partials/icons.html" %}
+
+  {% block layout %}{% endblock %}
+
+  {# Toasts serveur (messages Django) #}
+  {% if messages %}
+    <div style="display:none">
+      {% for message in messages %}
+        <span data-server-toast data-message="{{ message }}" data-level="{{ message.tags|default:'info' }}"></span>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% block modals %}{% endblock %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

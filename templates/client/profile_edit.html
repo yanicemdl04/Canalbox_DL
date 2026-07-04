@@ -1,0 +1,57 @@
+{% extends "base_client.html" %}
+{% load static %}
+
+{% block title %}Modifier mon profil — Canal Box{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+  <a href="{% url 'client_profile' %}" class="inline-flex items-center gap-2 cb-body mb-6 hover:text-pink transition" data-page-enter>
+    <svg class="i !w-4 !h-4"><use href="#i-chevron-left"/></svg> Retour au profil
+  </a>
+
+  <div class="mb-8">
+    <h1 class="cb-h2 !text-4xl">Modifier mon profil</h1>
+    <p class="cb-subtitle mt-2">Mettez à jour vos informations personnelles.</p>
+  </div>
+
+  <form method="post" action="{% url 'client_profile_edit' %}" class="space-y-6">
+    {% csrf_token %}
+
+    <section class="glass rounded-3xl p-6 sm:p-8 reveal">
+      <div class="flex items-center gap-5 mb-7">
+        <span class="avatar avatar-lg">{{ user.initials }}</span>
+        <div>
+          <button type="button" class="btn btn-glass btn-sm">Changer la photo</button>
+          <p class="cb-caption mt-2">JPG ou PNG. 2 Mo max.</p>
+        </div>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div class="field !mb-0"><label for="name">Nom complet</label><input class="input" id="name" name="name" value="{{ user.name }}"></div>
+        <div class="field !mb-0"><label for="email">Adresse e-mail</label><input class="input" id="email" name="email" type="email" value="{{ user.email }}"></div>
+        <div class="field !mb-0"><label for="phone">Téléphone</label><input class="input" id="phone" name="phone" value="+243 000 000 000"></div>
+        <div class="field !mb-0">
+          <label for="plan">Abonnement</label>
+          <select class="select" id="plan" name="plan">
+            <option {% if user.plan == 'Canal Box Fibre 200' %}selected{% endif %}>Canal Box Fibre 200</option>
+            <option>Canal Box Fibre 500</option>
+            <option>Canal Box TV + Internet</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="glass rounded-3xl p-6 sm:p-8 reveal" data-delay="0.06">
+      <h2 class="cb-h3 mb-5">Sécurité</h2>
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div class="field !mb-0"><label for="pwd">Nouveau mot de passe</label><input class="input" id="pwd" type="password" placeholder="••••••••"></div>
+        <div class="field !mb-0"><label for="pwd2">Confirmation</label><input class="input" id="pwd2" type="password" placeholder="••••••••"></div>
+      </div>
+    </section>
+
+    <div class="flex flex-col sm:flex-row items-center gap-3 justify-end">
+      <a href="{% url 'client_profile' %}" class="btn btn-ghost w-full sm:w-auto">Annuler</a>
+      <button type="submit" class="btn btn-primary btn-lg w-full sm:w-auto" data-loading><svg class="i"><use href="#i-check"/></svg> Enregistrer les modifications</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

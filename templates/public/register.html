@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static cb_extras %}
+
+{% block title %}Inscription — Canal Box{% endblock %}
+
+{% block layout %}
+<main class="min-h-screen flex items-center justify-center p-5 py-16">
+  <a href="{% url 'landing' %}" class="fixed top-6 left-6 z-20 flex items-center gap-2.5">
+    <span class="w-9 h-9 rounded-2xl grid place-items-center text-white font-extrabold text-lg" style="background:linear-gradient(135deg,var(--cb-pink),var(--cb-pink-600))">C</span>
+    <span class="font-display font-extrabold">Canal<span class="text-pink">Box</span></span>
+  </a>
+
+  <div class="glass rounded-4xl w-full max-w-[1020px] grid lg:grid-cols-2 overflow-hidden" data-page-enter>
+    <!-- Formulaire -->
+    <div class="p-8 sm:p-11 order-2 lg:order-1">
+      <h1 class="font-display font-extrabold text-2xl sm:text-3xl mb-2">Créer un compte</h1>
+      <p class="cb-body mb-8">Rejoignez la communauté Canal Box en quelques secondes.</p>
+
+      <form method="post" action="{% url 'register' %}" class="space-y-5" data-stagger>
+        {% csrf_token %}
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="field has-icon">
+            <label for="name">Nom complet</label>
+            <svg class="field-icon"><use href="#i-user"/></svg>
+            <input class="input" id="name" name="name" placeholder="Yanice Mundele" required>
+          </div>
+          <div class="field">
+            <label for="plan">Abonnement Canal Box</label>
+            <select class="select" id="plan" name="plan">
+              <option>Canal Box Fibre 200</option>
+              <option>Canal Box Fibre 500</option>
+              <option>Canal Box TV + Internet</option>
+              <option>Canal Box Essentiel</option>
+            </select>
+          </div>
+        </div>
+        <div class="field has-icon">
+          <label for="email">Adresse e-mail</label>
+          <svg class="field-icon"><use href="#i-mail"/></svg>
+          <input class="input" id="email" name="email" type="email" placeholder="vous@exemple.com" required>
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div class="field has-icon">
+            <label for="password">Mot de passe</label>
+            <svg class="field-icon"><use href="#i-lock"/></svg>
+            <input class="input" id="password" name="password" type="password" placeholder="8 caractères min." required>
+          </div>
+          <div class="field has-icon">
+            <label for="password2">Confirmation</label>
+            <svg class="field-icon"><use href="#i-lock"/></svg>
+            <input class="input" id="password2" name="password2" type="password" placeholder="••••••••" required>
+          </div>
+        </div>
+        <label class="flex items-start gap-3 cb-body cursor-pointer select-none">
+          <input type="checkbox" class="cb-check mt-0.5" required>
+          <span>J'accepte les <a href="#" class="font-semibold text-pink">conditions d'utilisation</a> et la <a href="#" class="font-semibold text-pink">politique de confidentialité</a> de Canal Box.</span>
+        </label>
+        <button type="submit" class="btn btn-primary btn-lg w-full" data-loading>Créer mon compte <svg class="i"><use href="#i-arrow-right"/></svg></button>
+      </form>
+
+      <p class="text-center cb-body mt-8">Déjà membre ?
+        <a href="{% url 'login' %}" class="font-semibold text-pink hover:text-pink-600 transition">Se connecter</a>
+      </p>
+    </div>
+
+    <!-- Panneau marque -->
+    <div class="glass-dark hidden lg:flex flex-col justify-between p-11 relative overflow-hidden order-1 lg:order-2">
+      <div class="cb-orb cb-orb--pink !opacity-40" style="position:absolute;bottom:-80px;right:-60px"></div>
+      <div class="relative">
+        <span class="badge badge-pink !bg-white/10 !text-pink-300 !border-white/10"><svg class="i !w-4 !h-4"><use href="#i-heart"/></svg> Bienvenue</span>
+        <h2 class="cb-h2 !text-4xl text-white mt-6 leading-tight">Votre voix<br>compte vraiment.</h2>
+        <p class="text-white/55 mt-4 leading-relaxed max-w-xs">Créez votre compte et donnez votre avis sur l'ensemble des services numériques Canal Box.</p>
+      </div>
+      <div class="relative space-y-3">
+        {% for cat in categories %}
+        <div class="flex items-center gap-3 glass rounded-2xl p-3.5 !bg-white/5 !border-white/10">
+          <span class="w-9 h-9 rounded-xl grid place-items-center text-pink-300 bg-white/10"><svg class="i !w-5 !h-5"><use href="#{{ cat.slug|cat_icon }}"/></svg></span>
+          <div><p class="text-white text-sm font-semibold">{{ cat.name }}</p><p class="text-white/40 text-xs">{{ cat.count }} avis publiés</p></div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base_client.html" %}
+{% load static cb_extras %}
+
+{% block title %}Tableau de bord — Canal Box{% endblock %}
+
+{% block content %}
+<!-- En-tête -->
+<div class="flex flex-wrap items-end justify-between gap-4 mb-8" data-page-enter>
+  <div>
+    <p class="cb-eyebrow">Bonjour {{ user.name|truncatewords:1 }} 👋</p>
+    <h1 class="cb-h2 !text-4xl mt-2">Votre espace Canal Box</h1>
+  </div>
+  <a href="{% url 'client_review_create' %}" class="btn btn-primary"><svg class="i"><use href="#i-plus"/></svg> Écrire un avis</a>
+</div>
+
+<!-- Cartes statistiques -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8" data-stagger>
+  <div class="glass glass-card rounded-3xl p-6">
+    <span class="w-11 h-11 rounded-2xl grid place-items-center text-pink mb-4" style="background:var(--cb-pink-soft)"><svg class="i !w-5 !h-5"><use href="#i-message"/></svg></span>
+    <p class="cb-h2 !text-3xl font-extrabold"><span data-count="{{ stats.my_reviews }}"></span></p>
+    <p class="cb-caption mt-1">Mes avis publiés</p>
+  </div>
+  <div class="glass glass-card rounded-3xl p-6">
+    <span class="w-11 h-11 rounded-2xl grid place-items-center text-pink mb-4" style="background:var(--cb-pink-soft)"><svg class="i !w-5 !h-5"><use href="#i-star"/></svg></span>
+    <p class="cb-h2 !text-3xl font-extrabold"><span data-count="{{ stats.avg_rating }}"></span></p>
+    <p class="cb-caption mt-1">Ma note moyenne</p>
+  </div>
+  <div class="glass glass-card rounded-3xl p-6">
+    <span class="w-11 h-11 rounded-2xl grid place-items-center text-pink mb-4" style="background:var(--cb-pink-soft)"><svg class="i !w-5 !h-5"><use href="#i-check-circle"/></svg></span>
+    <p class="cb-h2 !text-3xl font-extrabold"><span data-count="{{ stats.published }}"></span></p>
+    <p class="cb-caption mt-1">Avis en ligne</p>
+  </div>
+  <div class="glass glass-card rounded-3xl p-6">
+    <span class="w-11 h-11 rounded-2xl grid place-items-center text-pink mb-4" style="background:var(--cb-pink-soft)"><svg class="i !w-5 !h-5"><use href="#i-folder"/></svg></span>
+    <p class="cb-h2 !text-3xl font-extrabold"><span data-count="{{ stats.categories_used }}"></span></p>
+    <p class="cb-caption mt-1">Services évalués</p>
+  </div>
+</div>
+
+<div class="grid lg:grid-cols-[1.6fr_1fr] gap-6">
+  <!-- Derniers avis de la communauté -->
+  <section class="glass rounded-3xl p-6 sm:p-7 reveal">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="cb-h3">Derniers avis</h2>
+      <a href="{% url 'client_reviews' %}" class="text-sm font-semibold text-pink hover:text-pink-600 transition flex items-center gap-1">Tout voir <svg class="i !w-4 !h-4"><use href="#i-arrow-right"/></svg></a>
+    </div>
+    <div class="space-y-3">
+      {% for r in reviews %}
+      <a href="{% url 'client_review_detail' r.id %}" class="flex items-center gap-4 p-3.5 rounded-2xl hover:bg-white/60 transition group">
+        <span class="w-11 h-11 rounded-2xl grid place-items-center text-pink shrink-0" style="background:var(--cb-pink-soft)"><svg class="i !w-5 !h-5"><use href="#{{ r.category.slug|cat_icon }}"/></svg></span>
+        <div class="min-w-0 flex-1">
+          <p class="font-semibold text-sm truncate group-hover:text-pink transition">{{ r.title }}</p>
+          <p class="cb-caption">{{ r.author }} · {{ r.created_label }}</p>
+        </div>
+        {% include "partials/stars.html" with rating=r.rating %}
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Carte profil + services -->
+  <div class="space-y-6">
+    <section class="glass-dark rounded-3xl p-7 reveal">
+      <div class="flex items-center gap-4 mb-5">
+        <span class="avatar avatar-lg !w-14 !h-14 !text-lg">{{ user.initials }}</span>
+        <div><p class="text-white font-bold">{{ user.name }}</p><p class="text-white/50 text-sm">{{ user.plan }}</p></div>
+      </div>
+      <div class="flex items-center justify-between text-sm py-3 border-t border-white/10">
+        <span class="text-white/50">Membre depuis</span><span class="text-white font-semibold">{{ user.member_since }}</span>
+      </div>
+      <div class="flex items-center justify-between text-sm py-3 border-t border-white/10">
+        <span class="text-white/50">Statut</span><span class="badge badge-pos !bg-emerald-400/15">Actif</span>
+      </div>
+      <a href="{% url 'client_profile' %}" class="btn btn-glass !bg-white/10 !border-white/10 !text-white w-full mt-4">Gérer mon profil</a>
+    </section>
+
+    <section class="glass rounded-3xl p-7 reveal" data-delay="0.08">
+      <h3 class="cb-h3 mb-4">Évaluer un service</h3>
+      <div class="grid grid-cols-2 gap-3">
+        {% for cat in categories %}
+        <a href="{% url 'client_review_create' %}?categorie={{ cat.slug }}" class="chip !justify-center !py-3 !rounded-2xl">
+          <svg class="i !w-4 !h-4 text-pink"><use href="#{{ cat.slug|cat_icon }}"/></svg> {{ cat.name }}
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

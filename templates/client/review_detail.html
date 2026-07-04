@@ -1,0 +1,56 @@
+{% extends "base_client.html" %}
+{% load static cb_extras %}
+
+{% block title %}{% if review %}{{ review.title }}{% else %}Avis introuvable{% endif %} — Canal Box{% endblock %}
+
+{% block content %}
+{% if not review %}
+<div class="glass rounded-3xl max-w-xl mx-auto">
+  <div class="empty-state">
+    <span class="empty-icon"><svg class="i !w-8 !h-8"><use href="#i-inbox"/></svg></span>
+    <h3 class="cb-h3 mb-2">Avis introuvable</h3>
+    <p class="cb-body mb-6">Cet avis n'existe pas ou a été retiré de la plateforme.</p>
+    <a href="{% url 'client_reviews' %}" class="btn btn-primary">Retour aux avis</a>
+  </div>
+</div>
+{% else %}
+<div class="max-w-3xl mx-auto">
+  <a href="{% url 'client_reviews' %}" class="inline-flex items-center gap-2 cb-body mb-6 hover:text-pink transition" data-page-enter>
+    <svg class="i !w-4 !h-4"><use href="#i-chevron-left"/></svg> Retour aux avis
+  </a>
+
+  <article class="glass rounded-3xl p-7 sm:p-10 reveal">
+    <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <span class="badge badge-pink"><svg class="i !w-3.5 !h-3.5"><use href="#{{ review.category.slug|cat_icon }}"/></svg> {{ review.category.name }}</span>
+      {% include "partials/stars.html" with rating=review.rating %}
+    </div>
+
+    <h1 class="cb-h2 !text-3xl sm:!text-4xl mb-6">{{ review.title }}</h1>
+
+    <div class="flex items-center gap-3 pb-6 mb-6 border-b border-[color:var(--glass-hair)]">
+      <span class="avatar !w-11 !h-11">{{ review.initials }}</span>
+      <div>
+        <p class="font-semibold">{{ review.author }}</p>
+        <p class="cb-caption flex items-center gap-1.5"><svg class="i !w-3.5 !h-3.5"><use href="#i-calendar"/></svg> {{ review.created_label }}</p>
+      </div>
+    </div>
+
+    <p class="text-lg leading-relaxed text-[color:var(--cb-ink-2)]">{{ review.content }}</p>
+
+    <div class="flex items-center gap-3 mt-8 pt-6 border-t border-[color:var(--glass-hair)]">
+      <button class="btn btn-glass btn-sm"><svg class="i !w-4 !h-4"><use href="#i-heart"/></svg> Utile</button>
+      <button class="btn btn-glass btn-sm"><svg class="i !w-4 !h-4"><use href="#i-message"/></svg> Répondre</button>
+    </div>
+  </article>
+
+  {% if related %}
+  <div class="mt-12">
+    <h2 class="cb-h3 mb-5">Avis similaires · {{ review.category.name }}</h2>
+    <div class="grid sm:grid-cols-3 gap-5" data-stagger>
+      {% for r in related %}{% include "partials/review_card.html" with review=r %}{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,45 @@
+{% load static %}
+<footer class="relative mt-24 pb-10 px-5">
+  <div class="max-w-[1240px] mx-auto glass rounded-4xl p-10 md:p-14 overflow-hidden reveal">
+    <div class="grid md:grid-cols-[1.4fr_1fr_1fr_1fr] gap-10">
+      <div>
+        <div class="flex items-center gap-2.5 mb-4">
+          <span class="w-9 h-9 rounded-2xl grid place-items-center text-white font-extrabold text-lg" style="background:linear-gradient(135deg,var(--cb-pink),var(--cb-pink-600))">C</span>
+          <span class="font-display font-extrabold text-lg">Canal<span class="text-pink">Box</span></span>
+        </div>
+        <p class="cb-body max-w-xs">La voix de nos clients, au cœur de nos services numériques. Internet fibre, télévision et assistance premium.</p>
+      </div>
+      <div>
+        <p class="cb-eyebrow mb-4">Produit</p>
+        <ul class="space-y-2.5 cb-body">
+          <li><a href="{% url 'landing' %}#services" class="hover:text-pink transition">Services</a></li>
+          <li><a href="{% url 'landing' %}#fonctionnalites" class="hover:text-pink transition">Fonctionnalités</a></li>
+          <li><a href="{% url 'client_reviews' %}" class="hover:text-pink transition">Avis clients</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="cb-eyebrow mb-4">Compte</p>
+        <ul class="space-y-2.5 cb-body">
+          <li><a href="{% url 'login' %}" class="hover:text-pink transition">Connexion</a></li>
+          <li><a href="{% url 'register' %}" class="hover:text-pink transition">Inscription</a></li>
+          <li><a href="{% url 'forgot_password' %}" class="hover:text-pink transition">Mot de passe oublié</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="cb-eyebrow mb-4">Ressources</p>
+        <ul class="space-y-2.5 cb-body">
+          <li><a href="#" class="hover:text-pink transition">Centre d'aide</a></li>
+          <li><a href="#" class="hover:text-pink transition">Confidentialité</a></li>
+          <li><a href="#" class="hover:text-pink transition">Conditions</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr class="hr-hair my-8">
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="cb-caption">© 2026 Canal Box — Analyse de sentiments par LSTM. Projet académique.</p>
+      <div class="flex items-center gap-2">
+        <span class="badge badge-neutral"><span class="badge-dot" style="background:var(--sent-pos)"></span> Tous les systèmes opérationnels</span>
+      </div>
+    </div>
+  </div>
+</footer>

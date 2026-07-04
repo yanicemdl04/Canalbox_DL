@@ -1,0 +1,22 @@
+{% load static cb_extras %}
+{% comment %}Carte d'avis — vue CLIENT/PUBLIC : aucune donnée de sentiment/IA.{% endcomment %}
+<a href="{% url 'client_review_detail' review.id %}" data-tilt class="glass glass-card block rounded-3xl p-6 group" style="--mx:50%;--my:50%">
+  <div class="flex items-center justify-between mb-4">
+    <span class="badge badge-neutral"><svg class="i !w-3.5 !h-3.5 text-pink"><use href="#{{ review.category.slug|cat_icon }}"/></svg>{{ review.category.name }}</span>
+    {% include "partials/stars.html" with rating=review.rating %}
+  </div>
+  <h3 class="font-display font-bold text-lg leading-snug mb-2 group-hover:text-pink transition-colors">{{ review.title }}</h3>
+  <p class="cb-body line-clamp-3 mb-5">{{ review.excerpt }}</p>
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <span class="avatar !w-8 !h-8 !text-[0.72rem]">{{ review.initials }}</span>
+      <div class="leading-tight">
+        <p class="text-[0.82rem] font-semibold">{{ review.author }}</p>
+        <p class="cb-caption">{{ review.created_label }}</p>
+      </div>
+    </div>
+    <span class="w-8 h-8 rounded-full grid place-items-center bg-black/5 group-hover:bg-pink group-hover:text-white transition-all">
+      <svg class="i !w-4 !h-4"><use href="#i-arrow-up-right"/></svg>
+    </span>
+  </div>
+</a>

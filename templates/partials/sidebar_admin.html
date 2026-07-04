@@ -1,0 +1,36 @@
+{% load static %}
+<aside class="cb-sidebar hidden lg:block w-[260px] shrink-0">
+  <div class="glass glass-strong rounded-3xl h-full flex flex-col p-4">
+    <a href="{% url 'admin_dashboard' %}" class="flex items-center gap-2.5 px-2 py-2 mb-2">
+      <span class="w-9 h-9 rounded-2xl grid place-items-center text-white font-extrabold text-lg" style="background:linear-gradient(135deg,var(--cb-pink),var(--cb-pink-600))">C</span>
+      <div class="leading-tight">
+        <span class="font-display font-extrabold text-[0.98rem]">Canal<span class="text-pink">Box</span></span>
+        <span class="block cb-caption">Console admin</span>
+      </div>
+    </a>
+
+    <nav class="flex-1 overflow-y-auto -mx-1 px-1">
+      <p class="nav-section">Pilotage</p>
+      <a href="{% url 'admin_dashboard' %}" class="nav-item {% if active == 'dashboard' %}active{% endif %}"><svg class="i"><use href="#i-dashboard"/></svg> Tableau de bord</a>
+      <a href="{% url 'admin_logs' %}" class="nav-item {% if active == 'logs' %}active{% endif %}"><svg class="i"><use href="#i-activity"/></svg> Logs d'inférence</a>
+
+      <p class="nav-section">Avis & IA</p>
+      <a href="{% url 'admin_reviews' %}" class="nav-item {% if active == 'reviews' %}active{% endif %}"><svg class="i"><use href="#i-message"/></svg> Avis analysés</a>
+      <a href="{% url 'admin_moderation' %}" class="nav-item {% if active == 'moderation' %}active{% endif %}"><svg class="i"><use href="#i-shield"/></svg> Modération
+        <span class="ml-auto badge badge-pink !py-0.5 !px-2 !text-[0.68rem]">3</span></a>
+
+      <p class="nav-section">Gestion</p>
+      <a href="{% url 'admin_users' %}" class="nav-item {% if active == 'users' %}active{% endif %}"><svg class="i"><use href="#i-users"/></svg> Utilisateurs</a>
+      <a href="{% url 'admin_categories' %}" class="nav-item {% if active == 'categories' %}active{% endif %}"><svg class="i"><use href="#i-folder"/></svg> Catégories</a>
+    </nav>
+
+    <div class="mt-3 glass rounded-2xl p-3 flex items-center gap-3">
+      <span class="avatar avatar-dark !w-10 !h-10">{{ user.initials }}</span>
+      <div class="min-w-0 flex-1">
+        <p class="text-sm font-semibold truncate">{{ user.name }}</p>
+        <p class="cb-caption truncate">Administrateur</p>
+      </div>
+      <a href="{% url 'logout' %}" class="btn btn-ghost btn-icon !p-2" title="Déconnexion"><svg class="i !w-[18px] !h-[18px]"><use href="#i-log-out"/></svg></a>
+    </div>
+  </div>
+</aside>

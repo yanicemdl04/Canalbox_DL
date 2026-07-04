@@ -1,0 +1,73 @@
+{% extends "base_admin.html" %}
+{% load static cb_extras %}
+
+{% block title %}Utilisateurs — Console Canal Box{% endblock %}
+{% block page_title %}Gestion des utilisateurs{% endblock %}
+{% block page_subtitle %}Comptes clients et administrateurs de la plateforme{% endblock %}
+{% block toolbar %}<button class="btn btn-primary btn-sm" data-modal-open="modal-user"><svg class="i !w-4 !h-4"><use href="#i-plus"/></svg><span class="hidden sm:inline">Nouvel utilisateur</span></button>{% endblock %}
+
+{% block content %}
+<!-- Résumé -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" data-stagger>
+  <div class="glass glass-card rounded-3xl p-5"><p class="cb-h2 !text-2xl font-extrabold"><span data-count="3164"></span></p><p class="cb-caption mt-1">Clients</p></div>
+  <div class="glass glass-card rounded-3xl p-5"><p class="cb-h2 !text-2xl font-extrabold"><span data-count="4"></span></p><p class="cb-caption mt-1">Administrateurs</p></div>
+  <div class="glass glass-card rounded-3xl p-5"><p class="cb-h2 !text-2xl font-extrabold" style="color:var(--sent-pos)"><span data-count="3081"></span></p><p class="cb-caption mt-1">Comptes actifs</p></div>
+  <div class="glass glass-card rounded-3xl p-5"><p class="cb-h2 !text-2xl font-extrabold" style="color:var(--sent-neu)"><span data-count="87"></span></p><p class="cb-caption mt-1">Suspendus</p></div>
+</div>
+
+<div class="glass rounded-3xl overflow-hidden reveal">
+  <div class="overflow-x-auto">
+    <table class="cb-table min-w-[760px]">
+      <thead><tr><th>Utilisateur</th><th>Rôle</th><th>Statut</th><th>Avis</th><th>Inscription</th><th></th></tr></thead>
+      <tbody data-stagger>
+        {% for u in users %}
+        <tr>
+          <td>
+            <div class="flex items-center gap-3">
+              <span class="avatar {% if u.role == 'admin' %}avatar-dark{% endif %} !w-9 !h-9 !text-[0.72rem]">{{ u.initials }}</span>
+              <div><p class="font-semibold">{{ u.name }}</p><p class="cb-caption">{{ u.email }}</p></div>
+            </div>
+          </td>
+          <td>{% if u.role == 'admin' %}<span class="badge badge-pink"><svg class="i !w-3.5 !h-3.5"><use href="#i-shield"/></svg> Admin</span>{% else %}<span class="badge badge-neutral">Client</span>{% endif %}</td>
+          <td>{% if u.status == 'actif' %}<span class="badge badge-pos"><span class="badge-dot"></span> Actif</span>{% else %}<span class="badge badge-neu"><span class="badge-dot"></span> Suspendu</span>{% endif %}</td>
+          <td><span class="font-semibold">{{ u.reviews }}</span></td>
+          <td><span class="cb-caption whitespace-nowrap">{{ u.joined }}</span></td>
+          <td>
+            <div data-dropdown class="relative flex justify-end">
+              <button data-dropdown-trigger class="btn btn-ghost btn-icon !p-2"><svg class="i !w-[18px] !h-[18px]"><use href="#i-more"/></svg></button>
+              <div data-dropdown-menu class="glass glass-strong absolute right-0 mt-2 w-44 rounded-2xl p-2 z-40">
+                <a href="#" class="dropdown-link"><svg class="i"><use href="#i-eye"/></svg> Voir le profil</a>
+                <a href="#" class="dropdown-link"><svg class="i"><use href="#i-edit"/></svg> Modifier</a>
+                {% if u.status == 'actif' %}
+                <a href="#" class="dropdown-link" style="color:var(--sent-neu)"><svg class="i"><use href="#i-lock"/></svg> Suspendre</a>
+                {% else %}
+                <a href="#" class="dropdown-link" style="color:var(--sent-pos)"><svg class="i"><use href="#i-check"/></svg> Réactiver</a>
+                {% endif %}
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="modal-backdrop" id="modal-user">
+  <div class="modal glass glass-strong rounded-3xl p-7">
+    <h3 class="cb-h3 mb-1">Nouvel utilisateur</h3>
+    <p class="cb-body mb-6">Créez un compte client ou administrateur.</p>
+    <form class="space-y-4" onsubmit="event.preventDefault(); window.cbToast('Utilisateur créé (démo).','success'); document.querySelectorAll('.modal-backdrop.open').forEach(function(m){m.classList.remove('open')});">
+      <div class="field !mb-0"><label>Nom complet</label><input class="input" placeholder="Nom Prénom" required></div>
+      <div class="field !mb-0"><label>E-mail</label><input class="input" type="email" placeholder="email@canalbox.cd" required></div>
+      <div class="field !mb-0"><label>Rôle</label><select class="select"><option>Client</option><option>Administrateur</option></select></div>
+      <div class="flex gap-3 justify-end pt-2">
+        <button type="button" class="btn btn-ghost" data-modal-close>Annuler</button>
+        <button type="submit" class="btn btn-primary">Créer le compte</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

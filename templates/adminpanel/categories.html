@@ -1,0 +1,57 @@
+{% extends "base_admin.html" %}
+{% load static cb_extras %}
+
+{% block title %}Catégories — Console Canal Box{% endblock %}
+{% block page_title %}Gestion des catégories{% endblock %}
+{% block page_subtitle %}Services Canal Box évalués par les clients{% endblock %}
+{% block toolbar %}<button class="btn btn-primary btn-sm" data-modal-open="modal-cat"><svg class="i !w-4 !h-4"><use href="#i-plus"/></svg><span class="hidden sm:inline">Ajouter</span></button>{% endblock %}
+
+{% block content %}
+<div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-5" data-stagger>
+  {% for cat in categories %}
+  <div class="glass glass-card rounded-3xl p-6">
+    <div class="flex items-start justify-between mb-5">
+      <span class="w-12 h-12 rounded-2xl grid place-items-center text-pink" style="background:var(--cb-pink-soft)"><svg class="i !w-6 !h-6"><use href="#{{ cat.slug|cat_icon }}"/></svg></span>
+      <div data-dropdown class="relative">
+        <button data-dropdown-trigger class="btn btn-ghost btn-icon !p-1.5"><svg class="i !w-[18px] !h-[18px]"><use href="#i-more"/></svg></button>
+        <div data-dropdown-menu class="glass glass-strong absolute right-0 mt-2 w-40 rounded-2xl p-2 z-40">
+          <a href="#" class="dropdown-link"><svg class="i"><use href="#i-edit"/></svg> Renommer</a>
+          <a href="#" class="dropdown-link" style="color:var(--sent-neg)"><svg class="i"><use href="#i-trash"/></svg> Supprimer</a>
+        </div>
+      </div>
+    </div>
+    <h3 class="font-display font-bold text-lg mb-1">{{ cat.name }}</h3>
+    <p class="cb-body mb-5">{{ cat.description }}</p>
+    <div class="flex items-center justify-between pt-4 border-t border-[color:var(--glass-hair)]">
+      <span class="cb-caption">Avis publiés</span>
+      <span class="badge badge-pink">{{ cat.count }}</span>
+    </div>
+  </div>
+  {% endfor %}
+
+  <!-- Carte ajout -->
+  <button data-modal-open="modal-cat" class="glass glass-card rounded-3xl p-6 border-dashed flex flex-col items-center justify-center text-center min-h-[220px] hover:border-pink transition group" style="border:2px dashed var(--glass-hair)">
+    <span class="w-12 h-12 rounded-2xl grid place-items-center text-pink mb-3 group-hover:scale-110 transition" style="background:var(--cb-pink-soft)"><svg class="i !w-6 !h-6"><use href="#i-plus"/></svg></span>
+    <p class="font-semibold">Nouvelle catégorie</p>
+    <p class="cb-caption mt-1">Ajouter un service</p>
+  </button>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="modal-backdrop" id="modal-cat">
+  <div class="modal glass glass-strong rounded-3xl p-7">
+    <h3 class="cb-h3 mb-1">Nouvelle catégorie</h3>
+    <p class="cb-body mb-6">Créez un nouveau service Canal Box à évaluer.</p>
+    <form method="post" action="{% url 'admin_categories' %}" class="space-y-4">
+      {% csrf_token %}
+      <div class="field !mb-0"><label>Nom du service</label><input class="input" name="name" placeholder="Ex. Application mobile" required></div>
+      <div class="field !mb-0"><label>Description</label><textarea class="textarea !min-h-[90px]" name="description" placeholder="Courte description du service"></textarea></div>
+      <div class="flex gap-3 justify-end pt-2">
+        <button type="button" class="btn btn-ghost" data-modal-close>Annuler</button>
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

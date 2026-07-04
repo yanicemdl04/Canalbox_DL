@@ -1,0 +1,62 @@
+{% extends "base_admin.html" %}
+{% load static cb_extras %}
+
+{% block title %}Logs d'inférence — Console Canal Box{% endblock %}
+{% block page_title %}Logs d'inférence LSTM{% endblock %}
+{% block page_subtitle %}Journal des exécutions du modèle : succès, erreurs et latence{% endblock %}
+{% block toolbar %}<a href="{% url 'admin_export_csv' %}" class="btn btn-glass btn-sm"><svg class="i !w-4 !h-4"><use href="#i-download"/></svg><span class="hidden sm:inline">Exporter</span></a>{% endblock %}
+
+{% block content %}
+<!-- Résumé santé du modèle -->
+<div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6" data-stagger>
+  <div class="glass glass-card rounded-3xl p-6">
+    <div class="flex items-center justify-between mb-3"><span class="cb-caption">Débit</span><svg class="i !w-4 !h-4 text-pink"><use href="#i-zap"/></svg></div>
+    <p class="cb-h2 !text-2xl font-extrabold"><span data-count="3180"></span></p>
+    <p class="cb-caption mt-1">Inférences totales</p>
+  </div>
+  <div class="glass glass-card rounded-3xl p-6">
+    <div class="flex items-center justify-between mb-3"><span class="cb-caption">Fiabilité</span><svg class="i !w-4 !h-4" style="color:var(--sent-pos)"><use href="#i-check-circle"/></svg></div>
+    <p class="cb-h2 !text-2xl font-extrabold" style="color:var(--sent-pos)"><span data-count="99.4" data-suffix="%"></span></p>
+    <p class="cb-caption mt-1">Taux de succès</p>
+  </div>
+  <div class="glass glass-card rounded-3xl p-6">
+    <div class="flex items-center justify-between mb-3"><span class="cb-caption">Performance</span><svg class="i !w-4 !h-4" style="color:var(--sent-neu)"><use href="#i-clock"/></svg></div>
+    <p class="cb-h2 !text-2xl font-extrabold"><span data-count="612" data-suffix=" ms"></span></p>
+    <p class="cb-caption mt-1">Latence médiane</p>
+  </div>
+  <div class="glass glass-card rounded-3xl p-6">
+    <div class="flex items-center justify-between mb-3"><span class="cb-caption">Erreurs</span><svg class="i !w-4 !h-4" style="color:var(--sent-neg)"><use href="#i-alert"/></svg></div>
+    <p class="cb-h2 !text-2xl font-extrabold" style="color:var(--sent-neg)"><span data-count="19"></span></p>
+    <p class="cb-caption mt-1">Sur 30 jours</p>
+  </div>
+</div>
+
+<div class="glass rounded-3xl overflow-hidden reveal">
+  <div class="p-5 border-b border-[color:var(--glass-hair)] flex items-center gap-2">
+    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+    <span class="text-sm font-semibold">Flux en direct</span>
+    <span class="cb-caption ml-2">Modèle lstm-fr-v2.3</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="cb-table min-w-[820px]">
+      <thead><tr><th>Log</th><th>Avis</th><th>Statut</th><th>Sentiment</th><th>Confiance</th><th>Latence</th><th>Horodatage</th></tr></thead>
+      <tbody data-stagger>
+        {% for log in logs %}
+        <tr>
+          <td><span class="kbd">#{{ log.id }}</span></td>
+          <td><a href="{% url 'admin_review_detail' log.review_id %}" class="font-semibold hover:text-pink transition">#{{ log.review_id }}</a></td>
+          <td>
+            {% if log.status == 'succès' %}<span class="badge badge-pos"><svg class="i !w-3.5 !h-3.5"><use href="#i-check"/></svg> Succès</span>
+            {% else %}<span class="badge badge-neg"><svg class="i !w-3.5 !h-3.5"><use href="#i-alert"/></svg> Erreur</span>{% endif %}
+          </td>
+          <td>{% if log.sentiment != '—' %}<span class="badge {{ log.sentiment|sentiment_badge }}"><span class="badge-dot"></span>{{ log.sentiment|sentiment_label }}</span>{% else %}<span class="cb-caption">—</span>{% endif %}</td>
+          <td>{% if log.confidence %}<span class="font-semibold">{{ log.confidence|pct }}%</span>{% else %}<span class="cb-caption">—</span>{% endif %}</td>
+          <td><span class="{% if log.latency > 1000 %}text-[color:var(--sent-neg)] font-semibold{% endif %}">{{ log.latency }} ms</span></td>
+          <td><span class="cb-caption whitespace-nowrap">{{ log.ts }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base_client.html" %}
+{% load static cb_extras %}
+
+{% block title %}Écrire un avis — Canal Box{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+  <a href="{% url 'client_reviews' %}" class="inline-flex items-center gap-2 cb-body mb-6 hover:text-pink transition" data-page-enter>
+    <svg class="i !w-4 !h-4"><use href="#i-chevron-left"/></svg> Retour aux avis
+  </a>
+
+  <div class="mb-8">
+    <p class="cb-eyebrow">Partagez votre expérience</p>
+    <h1 class="cb-h2 !text-4xl mt-2">Rédiger un avis</h1>
+    <p class="cb-subtitle mt-2">Votre retour aide Canal Box à améliorer ses services.</p>
+  </div>
+
+  <form method="post" action="{% url 'client_review_create' %}" class="glass rounded-3xl p-6 sm:p-9 space-y-7 reveal">
+    {% csrf_token %}
+
+    <!-- Catégorie -->
+    <div class="field !mb-0">
+      <label>Service concerné</label>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-1">
+        {% for cat in categories %}
+        <label class="cb-radio-card">
+          <input type="radio" name="categorie" value="{{ cat.slug }}" {% if forloop.first %}checked{% endif %}>
+          <span class="w-10 h-10 rounded-xl grid place-items-center text-pink mb-2" style="background:var(--cb-pink-soft)"><svg class="i !w-5 !h-5"><use href="#{{ cat.slug|cat_icon }}"/></svg></span>
+          <span class="text-sm font-semibold">{{ cat.name }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Note étoiles -->
+    <div class="field !mb-0">
+      <label>Votre note</label>
+      <div class="flex items-center gap-4">
+        <div data-star-input data-value="0" class="cb-star-input flex gap-1.5">
+          {% for _ in "12345"|make_list %}
+          <button type="button" aria-label="Étoile {{ forloop.counter }}"><svg class="i !w-8 !h-8"><use href="#i-star"/></svg></button>
+          {% endfor %}
+        </div>
+        <input type="hidden" name="rating" value="0">
+        <span class="cb-caption">Cliquez pour noter</span>
+      </div>
+    </div>
+
+    <!-- Titre -->
+    <div class="field !mb-0">
+      <label for="title">Titre de l'avis</label>
+      <input class="input" id="title" name="title" placeholder="Résumez votre expérience en quelques mots" maxlength="80" required>
+    </div>
+
+    <!-- Contenu -->
+    <div class="field !mb-0">
+      <label for="content">Votre avis</label>
+      <textarea class="textarea" id="content" name="content" placeholder="Décrivez votre expérience avec ce service Canal Box…" maxlength="600" data-char-counter="#char-count" required></textarea>
+      <div class="flex justify-between items-center mt-2">
+        <span class="cb-caption flex items-center gap-1.5"><svg class="i !w-4 !h-4 text-pink"><use href="#i-shield"/></svg> Publié sous votre nom · {{ user.name }}</span>
+        <span class="cb-caption" id="char-count">0 / 600</span>
+      </div>
+    </div>
+
+    <hr class="hr-hair">
+    <div class="flex flex-col sm:flex-row items-center gap-3 justify-end">
+      <a href="{% url 'client_reviews' %}" class="btn btn-ghost w-full sm:w-auto">Annuler</a>
+      <button type="submit" class="btn btn-primary btn-lg w-full sm:w-auto" data-loading>Publier mon avis <svg class="i"><use href="#i-arrow-right"/></svg></button>
+    </div>
+  </form>
+</div>
+{% endblock %}

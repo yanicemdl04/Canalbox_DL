@@ -1,0 +1,128 @@
+{% extends "base_admin.html" %}
+{% load static cb_extras %}
+
+{% block title %}Avis analysés — Console Canal Box{% endblock %}
+{% block page_title %}Avis analysés{% endblock %}
+{% block page_subtitle %}Liste complète enrichie des résultats LSTM (sentiment & confiance){% endblock %}
+{% block toolbar %}<a href="{% url 'admin_export_csv' %}" class="btn btn-glass btn-sm"><svg class="i !w-4 !h-4"><use href="#i-download"/></svg><span class="hidden sm:inline">Exporter</span></a>{% endblock %}
+
+{% block content %}
+<!-- Filtres -->
+<form method="get" class="glass rounded-3xl p-4 sm:p-5 mb-6 reveal">
+  <div class="flex flex-col lg:flex-row gap-3">
+    <div class="field has-icon flex-1 !mb-0">
+      <svg class="field-icon !top-1/2 !-translate-y-1/2"><use href="#i-search"/></svg>
+      <input class="input !rounded-2xl" name="q" value="{{ q }}" placeholder="Rechercher dans les avis…" style="padding-left:46px">
+    </div>
+    <select name="sentiment" class="select !rounded-2xl lg:w-44" onchange="this.form.submit()">
+      <option value="">Tous sentiments</option>
+      <option value="positif" {% if active_sentiment == 'positif' %}selected{% endif %}>Positif</option>
+      <option value="negatif" {% if active_sentiment == 'negatif' %}selected{% endif %}>Négatif</option>
+      <option value="neutre" {% if active_sentiment == 'neutre' %}selected{% endif %}>Neutre</option>
+    </select>
+    <select name="categorie" class="select !rounded-2xl lg:w-44" onchange="this.form.submit()">
+      <option value="">Toutes catégories</option>
+      {% for cat in categories %}<option value="{{ cat.slug }}" {% if active_cat == cat.slug %}selected{% endif %}>{{ cat.name }}</option>{% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary !rounded-2xl"><svg class="i"><use href="#i-filter"/></svg><span class="hidden sm:inline">Filtrer</span></button>
+  </div>
+</form>
+
+<!-- Filtres rapides par sentiment -->
+<div class="flex items-center gap-2 mb-5 flex-wrap reveal">
+  <a href="{% url 'admin_reviews' %}" class="chip {% if not active_sentiment %}active{% endif %}">Tous · {{ total }}</a>
+  <a href="?sentiment=positif" class="chip {% if active_sentiment == 'positif' %}active{% endif %}"><span class="status-dot" style="background:var(--sent-pos)"></span> Positifs</a>
+  <a href="?sentiment=negatif" class="chip {% if active_sentiment == 'negatif' %}active{% endif %}"><span class="status-dot" style="background:var(--sent-neg)"></span> Négatifs</a>
+  <a href="?sentiment=neutre" class="chip {% if active_sentiment == 'neutre' %}active{% endif %}"><span class="status-dot" style="background:var(--sent-neu)"></span> Neutres</a>
+</div>
+
+<!-- Tableau -->
+<div class="glass rounded-3xl overflow-hidden reveal">
+  {% if reviews %}
+  <div class="overflow-x-auto">
+    <table class="cb-table min-w-[820px]">
+      <thead>
+        <tr>
+          <th>Avis</th><th>Catégorie</th><th>Note</th><th>Sentiment</th><th>Confiance</th><th>Date</th><th></th>
+        </tr>
+      </thead>
+      <tbody data-stagger>
+        {% for r in reviews %}
+        <tr>
+          <td>
+            <div class="flex items-center gap-3">
+              <span class="avatar !w-9 !h-9 !text-[0.72rem]">{{ r.initials }}</span>
+              <div class="min-w-0 max-w-[280px]">
+                <p class="font-semibold truncate">{{ r.title }}</p>
+                <p class="cb-caption truncate">{{ r.author }}{% if r.flagged %} · <span class="text-[color:var(--sent-neg)] font-semibold">signalé</span>{% endif %}</p>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge badge-neutral"><svg class="i !w-3.5 !h-3.5 text-pink"><use href="#{{ r.category.slug|cat_icon }}"/></svg>{{ r.category.name }}</span></td>
+          <td>{% include "partials/stars.html" with rating=r.rating %}</td>
+          <td><span class="badge {{ r.sentiment|sentiment_badge }}"><span class="badge-dot"></span>{{ r.sentiment|sentiment_label }}</span></td>
+          <td>
+            <div class="flex items-center gap-2">
+              <div class="progress w-16 {% if r.sentiment == 'positif' %}pos{% elif r.sentiment == 'negatif' %}neg{% else %}neu{% endif %}"><span style="width:{{ r.confidence|pct }}%"></span></div>
+              <span class="text-sm font-semibold">{{ r.confidence|pct }}%</span>
+            </div>
+          </td>
+          <td><span class="cb-caption whitespace-nowrap">{{ r.created_label }}</span></td>
+          <td>
+            <div class="flex items-center gap-1 justify-end">
+              <a href="{% url 'admin_review_detail' r.id %}" class="btn btn-ghost btn-icon !p-2" title="Consulter"><svg class="i !w-[18px] !h-[18px]"><use href="#i-eye"/></svg></a>
+              <a href="{% url 'admin_reanalyze' r.id %}" class="btn btn-ghost btn-icon !p-2" title="Réanalyser"><svg class="i !w-[18px] !h-[18px]"><use href="#i-refresh"/></svg></a>
+              <button type="button" class="btn btn-ghost btn-icon !p-2 !text-[color:var(--sent-neg)]" title="Supprimer" data-modal-open="modal-del" data-del-url="{% url 'admin_delete_review' r.id %}" data-del-title="{{ r.title }}"><svg class="i !w-[18px] !h-[18px]"><use href="#i-trash"/></svg></button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="flex items-center justify-between p-4 border-t border-[color:var(--glass-hair)]">
+    <p class="cb-caption">{{ total }} résultat{{ total|pluralize }}</p>
+    <div class="flex items-center gap-2">
+      <button class="btn btn-glass btn-icon !w-9 !h-9" disabled><svg class="i !w-4 !h-4"><use href="#i-chevron-left"/></svg></button>
+      <button class="btn btn-primary btn-icon !w-9 !h-9 !text-sm">1</button>
+      <button class="btn btn-glass btn-icon !w-9 !h-9 !text-sm">2</button>
+      <button class="btn btn-glass btn-icon !w-9 !h-9"><svg class="i !w-4 !h-4"><use href="#i-chevron-right"/></svg></button>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <span class="empty-icon"><svg class="i !w-8 !h-8"><use href="#i-inbox"/></svg></span>
+    <h3 class="cb-h3 mb-2">Aucun avis</h3>
+    <p class="cb-body mb-6">Aucun avis ne correspond à ces filtres.</p>
+    <a href="{% url 'admin_reviews' %}" class="btn btn-primary">Réinitialiser</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="modal-backdrop" id="modal-del">
+  <div class="modal glass glass-strong rounded-3xl p-7">
+    <span class="w-14 h-14 rounded-2xl grid place-items-center mb-5" style="background:rgba(240,68,56,.12);color:var(--sent-neg)"><svg class="i !w-6 !h-6"><use href="#i-trash"/></svg></span>
+    <h3 class="cb-h3 mb-2">Supprimer cet avis ?</h3>
+    <p class="cb-body mb-1">Vous êtes sur le point de supprimer :</p>
+    <p class="font-semibold mb-6" id="del-title">—</p>
+    <p class="cb-caption mb-6">Cette action de modération est définitive et sera enregistrée dans les logs.</p>
+    <div class="flex gap-3 justify-end">
+      <button class="btn btn-ghost" data-modal-close>Annuler</button>
+      <a href="#" id="del-confirm" class="btn btn-primary" style="background:linear-gradient(135deg,#f04438,#d92d20);box-shadow:0 8px 24px rgba(240,68,56,.35)">Supprimer définitivement</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('[data-modal-open="modal-del"]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.getElementById('del-title').textContent = btn.dataset.delTitle;
+      document.getElementById('del-confirm').setAttribute('href', btn.dataset.delUrl);
+    });
+  });
+</script>
+{% endblock %}

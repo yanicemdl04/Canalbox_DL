@@ -1,0 +1,80 @@
+{% load static %}
+<header data-navbar class="fixed top-0 inset-x-0 z-50 transition-all duration-500">
+  <div class="max-w-[1240px] mx-auto px-5 mt-3">
+    <nav class="glass glass-strong rounded-full px-4 sm:px-5 h-16 flex items-center justify-between">
+      <a href="{% url 'landing' %}" class="flex items-center gap-2.5 group">
+        <span class="w-9 h-9 rounded-2xl grid place-items-center text-white font-extrabold text-lg"
+              style="background:linear-gradient(135deg,var(--cb-pink),var(--cb-pink-600));box-shadow:0 6px 16px rgba(255,45,120,.4)">C</span>
+        <span class="font-display font-extrabold text-[1.05rem] tracking-tight">Canal<span class="text-pink">Box</span></span>
+      </a>
+
+      <div class="hidden lg:flex items-center gap-1 text-sm">
+        {% if user and user.role == 'client' %}
+          <a href="{% url 'client_dashboard' %}" class="px-4 py-2 rounded-full font-medium text-[color:var(--cb-slate)] hover:bg-black/5 transition">Tableau de bord</a>
+          <a href="{% url 'client_reviews' %}" class="px-4 py-2 rounded-full font-medium text-[color:var(--cb-slate)] hover:bg-black/5 transition">Avis</a>
+          <a href="{% url 'client_review_create' %}" class="px-4 py-2 rounded-full font-medium text-[color:var(--cb-slate)] hover:bg-black/5 transition">Écrire un avis</a>
+        {% else %}
+          <a href="{% url 'landing' %}#fonctionnalites" class="px-4 py-2 rounded-full font-medium text-[color:var(--cb-slate)] hover:bg-black/5 transition">Fonctionnalités</a>
+          <a href="{% url 'landing' %}#services" class="px-4 py-2 rounded-full font-medium text-[color:var(--cb-slate)] hover:bg-black/5 transition">Services</a>
+          <a href="{% url 'landing' %}#avis" class="px-4 py-2 rounded-full font-medium text-[color:var(--cb-slate)] hover:bg-black/5 transition">Avis clients</a>
+        {% endif %}
+      </div>
+
+      <div class="flex items-center gap-2">
+        {% if user %}
+          <div data-dropdown class="relative hidden sm:block">
+            <button data-dropdown-trigger class="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full hover:bg-black/5 transition">
+              <span class="avatar {% if user.role == 'admin' %}avatar-dark{% endif %} !w-9 !h-9 !text-[0.8rem]">{{ user.initials }}</span>
+              <span class="text-sm font-semibold hidden md:block">{{ user.name|truncatewords:1 }}</span>
+              <svg class="i !w-4 !h-4 text-[color:var(--cb-mist)]"><use href="#i-chevron-down"/></svg>
+            </button>
+            <div data-dropdown-menu class="cb-dropdown glass glass-strong absolute right-0 mt-2 w-60 rounded-2xl p-2">
+              <div class="px-3 py-2.5">
+                <p class="font-semibold text-sm">{{ user.name }}</p>
+                <p class="cb-caption truncate">{{ user.email }}</p>
+              </div>
+              <hr class="hr-hair my-1">
+              {% if user.role == 'admin' %}
+                <a href="{% url 'admin_dashboard' %}" class="dropdown-link"><svg class="i"><use href="#i-dashboard"/></svg> Console admin</a>
+              {% else %}
+                <a href="{% url 'client_dashboard' %}" class="dropdown-link"><svg class="i"><use href="#i-dashboard"/></svg> Tableau de bord</a>
+                <a href="{% url 'client_profile' %}" class="dropdown-link"><svg class="i"><use href="#i-user"/></svg> Mon profil</a>
+              {% endif %}
+              <hr class="hr-hair my-1">
+              <a href="{% url 'logout' %}" class="dropdown-link text-[color:var(--sent-neg)]"><svg class="i"><use href="#i-log-out"/></svg> Déconnexion</a>
+            </div>
+          </div>
+        {% else %}
+          <a href="{% url 'login' %}" class="btn btn-ghost btn-sm hidden sm:inline-flex">Connexion</a>
+          <a href="{% url 'register' %}" class="btn btn-primary btn-sm">Créer un compte</a>
+        {% endif %}
+        <button data-mobile-toggle class="lg:hidden btn btn-glass btn-icon !p-2.5" aria-label="Menu">
+          <svg class="i"><use href="#i-menu"/></svg>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  {# Menu mobile #}
+  <div data-mobile-menu class="cb-mobile-menu">
+    <div class="flex flex-col gap-1 text-lg font-semibold">
+      {% if user and user.role == 'client' %}
+        <a href="{% url 'client_dashboard' %}">Tableau de bord</a>
+        <a href="{% url 'client_reviews' %}">Avis</a>
+        <a href="{% url 'client_review_create' %}">Écrire un avis</a>
+        <a href="{% url 'client_profile' %}">Mon profil</a>
+        <a href="{% url 'logout' %}" class="text-[color:var(--sent-neg)]">Déconnexion</a>
+      {% elif user and user.role == 'admin' %}
+        <a href="{% url 'admin_dashboard' %}">Console admin</a>
+        <a href="{% url 'admin_reviews' %}">Avis analysés</a>
+        <a href="{% url 'logout' %}" class="text-[color:var(--sent-neg)]">Déconnexion</a>
+      {% else %}
+        <a href="{% url 'landing' %}#fonctionnalites">Fonctionnalités</a>
+        <a href="{% url 'landing' %}#services">Services</a>
+        <a href="{% url 'landing' %}#avis">Avis clients</a>
+        <a href="{% url 'login' %}">Connexion</a>
+        <a href="{% url 'register' %}" class="text-pink">Créer un compte</a>
+      {% endif %}
+    </div>
+  </div>
+</header>

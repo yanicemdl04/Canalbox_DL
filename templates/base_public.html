@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block layout %}
+  {% include "partials/navbar.html" %}
+  <main class="relative">
+    {% block content %}{% endblock %}
+  </main>
+  {% include "partials/footer.html" %}
+{% endblock %}

@@ -1,0 +1,1 @@
+{% load cb_extras %}<span class="stars" aria-label="Note {{ rating }} sur 5">{% for _ in rating|times %}<svg class="i"><use href="#i-star"/></svg>{% endfor %}{% for _ in rating|remaining_stars %}<svg class="i muted"><use href="#i-star"/></svg>{% endfor %}</span>

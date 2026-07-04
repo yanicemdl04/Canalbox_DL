@@ -1,0 +1,75 @@
+{% extends "base_client.html" %}
+{% load static cb_extras %}
+
+{% block title %}Avis clients — Canal Box{% endblock %}
+
+{% block content %}
+<div class="mb-8" data-page-enter>
+  <p class="cb-eyebrow">Communauté Canal Box</p>
+  <h1 class="cb-h2 !text-4xl mt-2">Explorer les avis</h1>
+  <p class="cb-subtitle mt-2">{{ total }} avis publiés par les clients Canal Box.</p>
+</div>
+
+<!-- Barre de recherche + filtres -->
+<form method="get" class="glass rounded-3xl p-4 sm:p-5 mb-8 reveal">
+  <div class="flex flex-col lg:flex-row gap-3">
+    <div class="field has-icon flex-1 !mb-0">
+      <svg class="field-icon !top-1/2 !-translate-y-1/2"><use href="#i-search"/></svg>
+      <input class="input !rounded-2xl" name="q" value="{{ q }}" placeholder="Rechercher un avis, un mot-clé…" style="padding-left:46px">
+    </div>
+    <div class="flex gap-3">
+      <select name="categorie" class="select !rounded-2xl lg:w-48" onchange="this.form.submit()">
+        <option value="">Toutes catégories</option>
+        {% for cat in categories %}<option value="{{ cat.slug }}" {% if active_cat == cat.slug %}selected{% endif %}>{{ cat.name }}</option>{% endfor %}
+      </select>
+      <select name="note" class="select !rounded-2xl lg:w-36" onchange="this.form.submit()">
+        <option value="">Toute note</option>
+        <option value="5" {% if active_note == '5' %}selected{% endif %}>5 étoiles</option>
+        <option value="4" {% if active_note == '4' %}selected{% endif %}>4 étoiles</option>
+        <option value="3" {% if active_note == '3' %}selected{% endif %}>3 étoiles</option>
+        <option value="2" {% if active_note == '2' %}selected{% endif %}>2 étoiles</option>
+        <option value="1" {% if active_note == '1' %}selected{% endif %}>1 étoile</option>
+      </select>
+      <button type="submit" class="btn btn-primary !rounded-2xl"><svg class="i"><use href="#i-filter"/></svg><span class="hidden sm:inline">Filtrer</span></button>
+    </div>
+  </div>
+  {% if q or active_cat or active_note %}
+  <div class="flex items-center gap-2 mt-4 flex-wrap">
+    <span class="cb-caption">Filtres actifs :</span>
+    {% if q %}<span class="chip active">« {{ q }} »</span>{% endif %}
+    {% if active_cat %}<span class="chip active">{{ active_cat }}</span>{% endif %}
+    {% if active_note %}<span class="chip active">{{ active_note }} étoiles</span>{% endif %}
+    <a href="{% url 'client_reviews' %}" class="text-sm font-semibold text-pink hover:underline ml-1">Réinitialiser</a>
+  </div>
+  {% endif %}
+</form>
+
+<!-- Grille d'avis -->
+{% if reviews %}
+<div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" data-stagger>
+  {% for review in reviews %}
+    {% include "partials/review_card.html" with review=review %}
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+<div class="flex items-center justify-center gap-2 mt-12 reveal">
+  <button class="btn btn-glass btn-icon" disabled><svg class="i !w-[18px] !h-[18px]"><use href="#i-chevron-left"/></svg></button>
+  <button class="btn btn-primary btn-icon !w-10 !h-10">1</button>
+  <button class="btn btn-glass btn-icon !w-10 !h-10">2</button>
+  <button class="btn btn-glass btn-icon !w-10 !h-10">3</button>
+  <span class="px-2 cb-caption">…</span>
+  <button class="btn btn-glass btn-icon !w-10 !h-10">8</button>
+  <button class="btn btn-glass btn-icon"><svg class="i !w-[18px] !h-[18px]"><use href="#i-chevron-right"/></svg></button>
+</div>
+{% else %}
+<div class="glass rounded-3xl reveal">
+  <div class="empty-state">
+    <span class="empty-icon"><svg class="i !w-8 !h-8"><use href="#i-search"/></svg></span>
+    <h3 class="cb-h3 mb-2">Aucun avis trouvé</h3>
+    <p class="cb-body max-w-sm mx-auto mb-6">Aucun résultat ne correspond à votre recherche. Essayez d'autres mots-clés ou réinitialisez les filtres.</p>
+    <a href="{% url 'client_reviews' %}" class="btn btn-primary">Réinitialiser la recherche</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

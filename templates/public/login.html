@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Connexion — Canal Box{% endblock %}
+
+{% block layout %}
+<main class="min-h-screen flex items-center justify-center p-5">
+  <a href="{% url 'landing' %}" class="fixed top-6 left-6 z-20 flex items-center gap-2.5">
+    <span class="w-9 h-9 rounded-2xl grid place-items-center text-white font-extrabold text-lg" style="background:linear-gradient(135deg,var(--cb-pink),var(--cb-pink-600))">C</span>
+    <span class="font-display font-extrabold">Canal<span class="text-pink">Box</span></span>
+  </a>
+
+  <div class="glass rounded-4xl w-full max-w-[980px] grid lg:grid-cols-2 overflow-hidden" data-page-enter>
+    <!-- Panneau marque -->
+    <div class="glass-dark hidden lg:flex flex-col justify-between p-11 relative overflow-hidden">
+      <div class="cb-orb cb-orb--pink !opacity-40" style="position:absolute;top:-80px;left:-60px"></div>
+      <div class="relative">
+        <span class="badge badge-pink !bg-white/10 !text-pink-300 !border-white/10"><svg class="i !w-4 !h-4"><use href="#i-sparkles"/></svg> Espace membre</span>
+        <h2 class="cb-h2 !text-4xl text-white mt-6 leading-tight">Content de<br>vous revoir.</h2>
+        <p class="text-white/55 mt-4 leading-relaxed max-w-xs">Retrouvez vos avis, suivez la communauté et contribuez à améliorer les services Canal Box.</p>
+      </div>
+      <div class="relative glass rounded-2xl p-5 !bg-white/5 !border-white/10">
+        <div class="stars mb-2">{% for _ in "12345"|make_list %}<svg class="i !w-4 !h-4"><use href="#i-star"/></svg>{% endfor %}</div>
+        <p class="text-white/80 text-sm italic">« Connexion enfin stable depuis la fibre. Le service client est réactif. »</p>
+        <p class="text-white/40 text-xs mt-3 font-semibold">Grâce K. — Kinshasa</p>
+      </div>
+    </div>
+
+    <!-- Formulaire -->
+    <div class="p-8 sm:p-11">
+      <h1 class="font-display font-extrabold text-2xl sm:text-3xl mb-2">Connexion</h1>
+      <p class="cb-body mb-8">Accédez à votre espace Canal Box.</p>
+
+      <form method="post" action="{% url 'login' %}" class="space-y-5" data-stagger>
+        {% csrf_token %}
+        <div class="field has-icon">
+          <label for="email">Adresse e-mail</label>
+          <svg class="field-icon"><use href="#i-mail"/></svg>
+          <input class="input" id="email" name="email" type="email" placeholder="vous@exemple.com" value="yanice.client@canalbox.cd" required>
+        </div>
+        <div class="field has-icon">
+          <label for="password">Mot de passe</label>
+          <svg class="field-icon"><use href="#i-lock"/></svg>
+          <input class="input" id="password" name="password" type="password" placeholder="••••••••" value="demo1234" required>
+          <button type="button" class="absolute right-4 top-[41px] text-[color:var(--cb-mist)] hover:text-ink transition" data-toggle-password="password">
+            <svg class="i !w-[18px] !h-[18px]"><use href="#i-eye"/></svg>
+          </button>
+        </div>
+        <div class="flex items-center justify-between">
+          <label class="flex items-center gap-2 cb-body cursor-pointer select-none">
+            <input type="checkbox" class="cb-check" checked> Se souvenir de moi
+          </label>
+          <a href="{% url 'forgot_password' %}" class="text-sm font-semibold text-pink hover:text-pink-600 transition">Mot de passe oublié ?</a>
+        </div>
+
+        <p class="cb-caption !text-[0.72rem]">Rôle de démonstration :</p>
+        <div class="grid grid-cols-2 gap-3">
+          <button type="submit" name="role" value="client" class="btn btn-primary w-full" data-loading>
+            <svg class="i"><use href="#i-user"/></svg> Espace client
+          </button>
+          <button type="submit" name="role" value="admin" class="btn btn-dark w-full" data-loading>
+            <svg class="i"><use href="#i-shield"/></svg> Espace admin
+          </button>
+        </div>
+      </form>
+
+      <p class="text-center cb-body mt-8">Pas encore de compte ?
+        <a href="{% url 'register' %}" class="font-semibold text-pink hover:text-pink-600 transition">Créer un compte</a>
+      </p>
+    </div>
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('[data-toggle-password]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var input = document.getElementById(btn.dataset.togglePassword);
+      var use = btn.querySelector('use');
+      if (input.type === 'password') { input.type = 'text'; use.setAttribute('href', '#i-eye-off'); }
+      else { input.type = 'password'; use.setAttribute('href', '#i-eye'); }
+    });
+  });
+</script>
+{% endblock %}

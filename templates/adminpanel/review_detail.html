@@ -1,0 +1,132 @@
+{% extends "base_admin.html" %}
+{% load static cb_extras %}
+
+{% block title %}Analyse de l'avis — Console Canal Box{% endblock %}
+{% block page_title %}Détail de l'avis{% endblock %}
+{% block page_subtitle %}Consultation & résultat du modèle LSTM{% endblock %}
+
+{% block content %}
+{% if not review %}
+<div class="glass rounded-3xl"><div class="empty-state">
+  <span class="empty-icon"><svg class="i !w-8 !h-8"><use href="#i-inbox"/></svg></span>
+  <h3 class="cb-h3 mb-2">Avis introuvable</h3>
+  <a href="{% url 'admin_reviews' %}" class="btn btn-primary mt-4">Retour à la liste</a>
+</div></div>
+{% else %}
+<a href="{% url 'admin_reviews' %}" class="inline-flex items-center gap-2 cb-body mb-6 hover:text-pink transition">
+  <svg class="i !w-4 !h-4"><use href="#i-chevron-left"/></svg> Retour aux avis
+</a>
+
+<div class="grid xl:grid-cols-[1.4fr_1fr] gap-6">
+  <!-- Contenu de l'avis -->
+  <div class="space-y-6">
+    <article class="glass rounded-3xl p-7 sm:p-9 reveal">
+      <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <span class="badge badge-pink"><svg class="i !w-3.5 !h-3.5"><use href="#{{ review.category.slug|cat_icon }}"/></svg> {{ review.category.name }}</span>
+        <div class="flex items-center gap-2">
+          {% if review.flagged %}<span class="badge badge-neg"><svg class="i !w-3.5 !h-3.5"><use href="#i-alert"/></svg> Signalé</span>{% endif %}
+          <span class="badge badge-neutral">#{{ review.id }}</span>
+        </div>
+      </div>
+      <h1 class="cb-h2 !text-3xl mb-5">{{ review.title }}</h1>
+      <div class="flex items-center gap-3 pb-6 mb-6 border-b border-[color:var(--glass-hair)]">
+        <span class="avatar !w-11 !h-11">{{ review.initials }}</span>
+        <div class="flex-1">
+          <p class="font-semibold">{{ review.author }}</p>
+          <p class="cb-caption flex items-center gap-1.5"><svg class="i !w-3.5 !h-3.5"><use href="#i-calendar"/></svg> {{ review.created_label }}</p>
+        </div>
+        {% include "partials/stars.html" with rating=review.rating %}
+      </div>
+      <p class="text-lg leading-relaxed text-[color:var(--cb-ink-2)]">{{ review.content }}</p>
+    </article>
+
+    <!-- Actions de modération -->
+    <div class="glass rounded-3xl p-6 reveal" data-delay="0.05">
+      <h2 class="cb-h3 mb-4">Actions de modération</h2>
+      <div class="flex flex-wrap gap-3">
+        <a href="{% url 'admin_reanalyze' review.id %}" class="btn btn-primary" data-loading><svg class="i"><use href="#i-refresh"/></svg> Relancer l'analyse LSTM</a>
+        <button class="btn btn-glass"><svg class="i"><use href="#i-check-circle"/></svg> Valider</button>
+        <button class="btn btn-glass" data-modal-open="modal-del2" style="color:var(--sent-neg)"><svg class="i"><use href="#i-trash"/></svg> Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panneau IA -->
+  <aside class="space-y-6">
+    <section class="glass-dark rounded-3xl p-7 reveal" data-delay="0.04">
+      <div class="flex items-center gap-2 mb-6">
+        <svg class="i !w-5 !h-5 text-pink-300"><use href="#i-cpu"/></svg>
+        <h2 class="font-display font-bold text-white">Résultat LSTM</h2>
+        <span class="badge badge-pink !bg-white/10 !text-pink-300 !border-white/10 ml-auto">v2.3</span>
+      </div>
+
+      <!-- Anneau de confiance -->
+      <div class="flex flex-col items-center mb-6">
+        <div class="relative">
+          <svg width="180" height="180" class="conf-ring" data-ring="{{ review.confidence }}">
+            <circle class="track" cx="90" cy="90" r="78"></circle>
+            <circle class="value" cx="90" cy="90" r="78" style="stroke:{{ review.sentiment|sentiment_color }}"></circle>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span class="text-white text-4xl font-extrabold" data-count="{{ review.confidence|pct }}" data-suffix="%"></span>
+            <span class="text-white/50 text-xs font-semibold uppercase tracking-wider">confiance</span>
+          </div>
+        </div>
+        <span class="badge {{ review.sentiment|sentiment_badge }} mt-4 !text-sm !px-4 !py-1.5">
+          <span class="badge-dot"></span> Sentiment {{ review.sentiment|sentiment_label }}
+        </span>
+      </div>
+
+      <!-- Distribution des probabilités -->
+      <div class="space-y-3.5 pt-5 border-t border-white/10">
+        <p class="text-white/50 text-xs font-semibold uppercase tracking-wider mb-1">Distribution (softmax)</p>
+        <div>
+          <div class="flex justify-between text-sm mb-1.5"><span class="text-white/70">Positif</span><span class="text-white font-semibold">{{ probs.positif }}%</span></div>
+          <div class="progress !bg-white/10 pos"><span data-progress="{{ probs.positif }}" style="width:0"></span></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1.5"><span class="text-white/70">Négatif</span><span class="text-white font-semibold">{{ probs.negatif }}%</span></div>
+          <div class="progress !bg-white/10 neg"><span data-progress="{{ probs.negatif }}" style="width:0"></span></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1.5"><span class="text-white/70">Neutre</span><span class="text-white font-semibold">{{ probs.neutre }}%</span></div>
+          <div class="progress !bg-white/10 neu"><span data-progress="{{ probs.neutre }}" style="width:0"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Métadonnées d'inférence -->
+    <section class="glass rounded-3xl p-6 reveal" data-delay="0.1">
+      <h3 class="font-semibold mb-4">Métadonnées d'inférence</h3>
+      <dl class="space-y-3 text-sm">
+        <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-clock"/></svg> Temps de traitement</dt><dd class="font-semibold">{{ review.processing_ms }} ms</dd></div>
+        <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-cpu"/></svg> Modèle</dt><dd class="font-semibold">lstm-fr-v2.3</dd></div>
+        <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-check-circle"/></svg> Statut</dt><dd><span class="badge badge-pos">Analysé</span></dd></div>
+        <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-calendar"/></svg> Analysé le</dt><dd class="font-semibold">{{ review.created_label }}</dd></div>
+      </dl>
+    </section>
+
+    <div class="glass rounded-3xl p-5 reveal flex items-start gap-3" data-delay="0.14" style="background:var(--cb-pink-soft)">
+      <svg class="i !w-5 !h-5 text-pink shrink-0 mt-0.5"><use href="#i-shield"/></svg>
+      <p class="text-sm text-[color:var(--cb-slate)]">Ces données d'analyse sont <strong>strictement réservées aux administrateurs</strong> et ne sont jamais exposées aux clients.</p>
+    </div>
+  </aside>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block modals %}
+{% if review %}
+<div class="modal-backdrop" id="modal-del2">
+  <div class="modal glass glass-strong rounded-3xl p-7">
+    <span class="w-14 h-14 rounded-2xl grid place-items-center mb-5" style="background:rgba(240,68,56,.12);color:var(--sent-neg)"><svg class="i !w-6 !h-6"><use href="#i-trash"/></svg></span>
+    <h3 class="cb-h3 mb-2">Supprimer cet avis ?</h3>
+    <p class="cb-body mb-6">« {{ review.title }} » sera définitivement supprimé. Cette action est enregistrée dans les logs de modération.</p>
+    <div class="flex gap-3 justify-end">
+      <button class="btn btn-ghost" data-modal-close>Annuler</button>
+      <a href="{% url 'admin_delete_review' review.id %}" class="btn btn-primary" style="background:linear-gradient(135deg,#f04438,#d92d20)">Supprimer</a>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

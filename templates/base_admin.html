@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block layout %}
+<div class="cb-shell" style="padding-top:16px; padding-bottom:24px">
+  <div class="flex gap-6">
+    {% include "partials/sidebar_admin.html" %}
+
+    <div class="flex-1 min-w-0">
+      {# Barre supérieure admin #}
+      <header class="glass glass-strong rounded-3xl h-16 px-4 sm:px-5 flex items-center justify-between mb-6 sticky top-3 z-30" data-page-enter>
+        <div class="flex items-center gap-3 min-w-0">
+          <button data-mobile-toggle class="lg:hidden btn btn-glass btn-icon !p-2.5"><svg class="i"><use href="#i-menu"/></svg></button>
+          <div class="min-w-0">
+            <h1 class="font-display font-extrabold text-lg sm:text-xl truncate">{% block page_title %}Console{% endblock %}</h1>
+            <p class="cb-caption hidden sm:block">{% block page_subtitle %}{% endblock %}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="field has-icon hidden md:block" style="width:240px">
+            <svg class="field-icon !top-1/2 !-translate-y-1/2"><use href="#i-search"/></svg>
+            <input class="input !py-2.5 !rounded-full" style="padding-left:42px" placeholder="Rechercher…">
+          </div>
+          <button class="btn btn-glass btn-icon relative"><svg class="i !w-[18px] !h-[18px]"><use href="#i-bell"/></svg>
+            <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-pink"></span></button>
+          {% block toolbar %}{% endblock %}
+        </div>
+      </header>
+
+      <main>
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+</div>
+
+{# Menu mobile admin #}
+<div data-mobile-menu class="cb-mobile-menu">
+  <div class="flex flex-col gap-1 text-lg font-semibold">
+    <a href="{% url 'admin_dashboard' %}">Tableau de bord</a>
+    <a href="{% url 'admin_reviews' %}">Avis analysés</a>
+    <a href="{% url 'admin_moderation' %}">Modération</a>
+    <a href="{% url 'admin_users' %}">Utilisateurs</a>
+    <a href="{% url 'admin_categories' %}">Catégories</a>
+    <a href="{% url 'admin_logs' %}">Logs d'inférence</a>
+    <a href="{% url 'logout' %}" class="text-[color:var(--sent-neg)]">Déconnexion</a>
+  </div>
+</div>
+{% endblock %}

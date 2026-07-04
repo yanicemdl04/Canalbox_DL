@@ -1,0 +1,45 @@
+{% extends "base_admin.html" %}
+{% load static cb_extras %}
+
+{% block title %}Modération — Console Canal Box{% endblock %}
+{% block page_title %}File de modération{% endblock %}
+{% block page_subtitle %}Avis signalés nécessitant une action{% endblock %}
+
+{% block content %}
+{% if reviews %}
+<div class="mb-6 glass rounded-3xl p-5 flex items-center gap-4 reveal" style="background:rgba(247,144,9,.08)">
+  <span class="w-11 h-11 rounded-2xl grid place-items-center shrink-0" style="background:rgba(247,144,9,.15);color:#b25b00"><svg class="i !w-5 !h-5"><use href="#i-alert"/></svg></span>
+  <div><p class="font-semibold">{{ reviews|length }} avis en attente de modération</p><p class="cb-body">Vérifiez chaque contenu signalé avant validation ou suppression.</p></div>
+</div>
+
+<div class="space-y-4" data-stagger>
+  {% for r in reviews %}
+  <div class="glass glass-card rounded-3xl p-6">
+    <div class="flex flex-col lg:flex-row lg:items-center gap-5">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-3 flex-wrap">
+          <span class="badge badge-neg"><svg class="i !w-3.5 !h-3.5"><use href="#i-alert"/></svg> Signalé</span>
+          <span class="badge badge-neutral"><svg class="i !w-3.5 !h-3.5 text-pink"><use href="#{{ r.category.slug|cat_icon }}"/></svg> {{ r.category.name }}</span>
+          <span class="badge {{ r.sentiment|sentiment_badge }}"><span class="badge-dot"></span>{{ r.sentiment|sentiment_label }} · {{ r.confidence|pct }}%</span>
+        </div>
+        <h3 class="font-display font-bold text-lg mb-1">{{ r.title }}</h3>
+        <p class="cb-body line-clamp-2 mb-3">{{ r.content }}</p>
+        <p class="cb-caption flex items-center gap-2"><span class="avatar !w-6 !h-6 !text-[0.6rem]">{{ r.initials }}</span> {{ r.author }} · {{ r.created_label }}</p>
+      </div>
+      <div class="flex lg:flex-col gap-2 shrink-0">
+        <a href="{% url 'admin_review_detail' r.id %}" class="btn btn-glass btn-sm flex-1"><svg class="i !w-4 !h-4"><use href="#i-eye"/></svg> Examiner</a>
+        <button class="btn btn-glass btn-sm flex-1" style="color:var(--sent-pos)"><svg class="i !w-4 !h-4"><use href="#i-check"/></svg> Valider</button>
+        <a href="{% url 'admin_delete_review' r.id %}" class="btn btn-glass btn-sm flex-1" style="color:var(--sent-neg)"><svg class="i !w-4 !h-4"><use href="#i-trash"/></svg> Supprimer</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="glass rounded-3xl reveal"><div class="empty-state">
+  <span class="empty-icon" style="background:rgba(18,183,106,.12);color:var(--sent-pos);border-color:rgba(18,183,106,.2)"><svg class="i !w-8 !h-8"><use href="#i-check-circle"/></svg></span>
+  <h3 class="cb-h3 mb-2">Tout est en ordre</h3>
+  <p class="cb-body">Aucun avis signalé pour le moment. La file de modération est vide.</p>
+</div></div>
+{% endif %}
+{% endblock %}

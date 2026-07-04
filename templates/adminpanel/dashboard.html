@@ -1,0 +1,143 @@
+{% extends "base_admin.html" %}
+{% load static cb_extras %}
+
+{% block title %}Tableau de bord — Console Canal Box{% endblock %}
+{% block page_title %}Tableau de bord analytique{% endblock %}
+{% block page_subtitle %}Vue d'ensemble de la satisfaction client et de l'analyse LSTM{% endblock %}
+{% block toolbar %}
+  <a href="{% url 'admin_export_csv' %}" class="btn btn-glass btn-sm hidden sm:inline-flex"><svg class="i !w-4 !h-4"><use href="#i-download"/></svg> CSV</a>
+  <a href="{% url 'admin_export_pdf' %}" class="btn btn-primary btn-sm"><svg class="i !w-4 !h-4"><use href="#i-file-text"/></svg> Export PDF</a>
+{% endblock %}
+
+{% block content %}
+<!-- KPI -->
+<div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6" data-stagger>
+  <div class="glass glass-card rounded-3xl p-6">
+    <div class="flex items-center justify-between mb-3">
+      <span class="w-10 h-10 rounded-2xl grid place-items-center text-pink" style="background:var(--cb-pink-soft)"><svg class="i !w-5 !h-5"><use href="#i-message"/></svg></span>
+      <span class="badge badge-pos !py-1"><svg class="i !w-3.5 !h-3.5"><use href="#i-trending-up"/></svg> +12%</span>
+    </div>
+    <p class="cb-h2 !text-3xl font-extrabold"><span data-count="3180"></span></p>
+    <p class="cb-caption mt-1">Avis analysés</p>
+  </div>
+  <div class="glass glass-card rounded-3xl p-6">
+    <div class="flex items-center justify-between mb-3">
+      <span class="w-10 h-10 rounded-2xl grid place-items-center" style="background:rgba(18,183,106,.12);color:var(--sent-pos)"><svg class="i !w-5 !h-5"><use href="#i-heart"/></svg></span>
+      <span class="badge badge-pos !py-1"><svg class="i !w-3.5 !h-3.5"><use href="#i-trending-up"/></svg> +5%</span>
+    </div>
+    <p class="cb-h2 !text-3xl font-extrabold"><span data-count="{{ stats.satisfaction }}" data-suffix="%"></span></p>
+    <p class="cb-caption mt-1">Taux de satisfaction</p>
+  </div>
+  <div class="glass glass-card rounded-3xl p-6">
+    <div class="flex items-center justify-between mb-3">
+      <span class="w-10 h-10 rounded-2xl grid place-items-center text-pink" style="background:var(--cb-pink-soft)"><svg class="i !w-5 !h-5"><use href="#i-cpu"/></svg></span>
+      <span class="badge badge-neutral !py-1">LSTM v2.3</span>
+    </div>
+    <p class="cb-h2 !text-3xl font-extrabold"><span data-count="91" data-suffix="%"></span></p>
+    <p class="cb-caption mt-1">Confiance moyenne IA</p>
+  </div>
+  <div class="glass glass-card rounded-3xl p-6">
+    <div class="flex items-center justify-between mb-3">
+      <span class="w-10 h-10 rounded-2xl grid place-items-center" style="background:rgba(247,144,9,.14);color:#b25b00"><svg class="i !w-5 !h-5"><use href="#i-clock"/></svg></span>
+      <span class="badge badge-pos !py-1"><svg class="i !w-3.5 !h-3.5"><use href="#i-trending-down"/></svg> -8%</span>
+    </div>
+    <p class="cb-h2 !text-3xl font-extrabold"><span data-count="612" data-suffix=" ms"></span></p>
+    <p class="cb-caption mt-1">Latence moyenne</p>
+  </div>
+</div>
+
+<div class="grid xl:grid-cols-[1.7fr_1fr] gap-6 mb-6">
+  <!-- Courbe / histogramme d'évolution -->
+  <section class="glass rounded-3xl p-6 sm:p-7 reveal">
+    <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div>
+        <h2 class="cb-h3">Évolution des sentiments</h2>
+        <p class="cb-caption">7 derniers jours · classification automatique LSTM</p>
+      </div>
+      <div class="flex items-center gap-3 text-xs font-semibold flex-wrap">
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:var(--sent-pos)"></span>Positif</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:var(--sent-neg)"></span>Négatif</span>
+        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:var(--sent-neu)"></span>Neutre</span>
+      </div>
+    </div>
+    <div class="flex items-end justify-between gap-2 sm:gap-4 h-56">
+      {% for d in stats.trend %}
+      <div class="flex-1 flex flex-col items-center gap-2 h-full justify-end">
+        <div class="w-full flex items-end justify-center gap-1 h-full">
+          <div class="w-full max-w-[14px] rounded-t-lg" style="background:linear-gradient(180deg,var(--sent-pos),#34d399)" data-bar="{{ d.pos }}" title="Positif : {{ d.pos }}"></div>
+          <div class="w-full max-w-[14px] rounded-t-lg" style="background:linear-gradient(180deg,var(--sent-neg),#fb7185)" data-bar="{{ d.neg }}" title="Négatif : {{ d.neg }}"></div>
+          <div class="w-full max-w-[14px] rounded-t-lg" style="background:linear-gradient(180deg,var(--sent-neu),#fbbf24)" data-bar="{{ d.neu }}" title="Neutre : {{ d.neu }}"></div>
+        </div>
+        <span class="cb-caption">{{ d.day }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Donut répartition sentiment -->
+  <section class="glass rounded-3xl p-6 sm:p-7 reveal" data-delay="0.06">
+    <h2 class="cb-h3 mb-6">Répartition globale</h2>
+    <div class="flex items-center justify-center mb-6">
+      <div class="cb-donut" style="--pos:{{ stats.positive_pct }};--neg:{{ stats.negative_pct }};--neu:{{ stats.neutral_pct }}">
+        <div class="cb-donut-hole">
+          <span class="cb-h2 !text-3xl font-extrabold" data-count="{{ stats.positive_pct }}" data-suffix="%"></span>
+          <span class="cb-caption">positifs</span>
+        </div>
+      </div>
+    </div>
+    <div class="space-y-3">
+      <div class="flex items-center justify-between text-sm">
+        <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:var(--sent-pos)"></span>Positif</span>
+        <span class="font-semibold">{{ stats.positive_pct }}%</span>
+      </div>
+      <div class="flex items-center justify-between text-sm">
+        <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:var(--sent-neg)"></span>Négatif</span>
+        <span class="font-semibold">{{ stats.negative_pct }}%</span>
+      </div>
+      <div class="flex items-center justify-between text-sm">
+        <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full" style="background:var(--sent-neu)"></span>Neutre</span>
+        <span class="font-semibold">{{ stats.neutral_pct }}%</span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="grid xl:grid-cols-[1fr_1.4fr] gap-6">
+  <!-- Répartition par catégorie -->
+  <section class="glass rounded-3xl p-6 sm:p-7 reveal">
+    <h2 class="cb-h3 mb-6">Satisfaction par service</h2>
+    <div class="space-y-5">
+      {% for cat in stats.by_category %}
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-semibold">{{ cat.name }}</span>
+          <span class="cb-caption">{{ cat.value }} avis · {{ cat.sentiment }}% pos.</span>
+        </div>
+        <div class="progress"><span data-progress="{{ cat.sentiment }}" style="width:0"></span></div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Avis récents avec sentiment -->
+  <section class="glass rounded-3xl p-6 sm:p-7 reveal" data-delay="0.06">
+    <div class="flex items-center justify-between mb-5">
+      <h2 class="cb-h3">Derniers avis analysés</h2>
+      <a href="{% url 'admin_reviews' %}" class="text-sm font-semibold text-pink hover:text-pink-600 transition flex items-center gap-1">Tout voir <svg class="i !w-4 !h-4"><use href="#i-arrow-right"/></svg></a>
+    </div>
+    <div class="space-y-2">
+      {% for r in reviews %}
+      <a href="{% url 'admin_review_detail' r.id %}" class="flex items-center gap-3 p-3 rounded-2xl hover:bg-white/60 transition group">
+        <span class="avatar !w-9 !h-9 !text-[0.72rem]">{{ r.initials }}</span>
+        <div class="min-w-0 flex-1">
+          <p class="font-semibold text-sm truncate group-hover:text-pink transition">{{ r.title }}</p>
+          <p class="cb-caption">{{ r.category.name }} · {{ r.created_label }}</p>
+        </div>
+        <span class="badge {{ r.sentiment|sentiment_badge }}">{{ r.sentiment|sentiment_label }}</span>
+        <span class="cb-caption font-semibold hidden sm:block">{{ r.confidence|pct }}%</span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}
