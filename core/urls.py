@@ -25,9 +25,13 @@ urlpatterns = [
     path("administration/avis/<int:review_id>/reanalyser/", views.admin_reanalyze, name="admin_reanalyze"),
     path("administration/avis/<int:review_id>/supprimer/", views.admin_delete_review, name="admin_delete_review"),
     path("administration/utilisateurs/", views.admin_users, name="admin_users"),
+    path("administration/utilisateurs/<int:user_id>/suspendre/", views.admin_user_suspend, name="admin_user_suspend"),
+    path("administration/utilisateurs/<int:user_id>/activer/", views.admin_user_activate, name="admin_user_activate"),
     path("administration/categories/", views.admin_categories, name="admin_categories"),
+    path("administration/categories/<int:category_id>/supprimer/", views.admin_category_delete, name="admin_category_delete"),
     path("administration/logs/", views.admin_logs, name="admin_logs"),
     path("administration/moderation/", views.admin_moderation, name="admin_moderation"),
+    path("administration/moderation/<int:review_id>/valider/", views.admin_unflag_review, name="admin_unflag_review"),
     path("administration/exports/csv/", views.admin_export_csv, name="admin_export_csv"),
     path("administration/exports/pdf/", views.admin_export_pdf, name="admin_export_pdf"),
 ]

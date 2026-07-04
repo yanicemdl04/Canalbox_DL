@@ -40,6 +40,11 @@ INSTALLED_APPS = [
     'core',
 ]
 
+AUTH_USER_MODEL = 'core.User'
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'client_dashboard'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -122,3 +127,9 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- LSTM (stub par défaut — remplacer par "keras" quand le modèle est prêt) ---
+LSTM_BACKEND = 'stub'
+LSTM_MODEL_VERSION = 'lstm-stub-v1'
+LSTM_MODEL_PATH = BASE_DIR / 'ml_models' / 'lstm_sentiment.h5'
+MIN_CONFIDENCE_THRESHOLD = 0.65

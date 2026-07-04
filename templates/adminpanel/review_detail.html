@@ -44,9 +44,9 @@
     <div class="glass rounded-3xl p-6 reveal" data-delay="0.05">
       <h2 class="cb-h3 mb-4">Actions de modération</h2>
       <div class="flex flex-wrap gap-3">
-        <a href="{% url 'admin_reanalyze' review.id %}" class="btn btn-primary" data-loading><svg class="i"><use href="#i-refresh"/></svg> Relancer l'analyse LSTM</a>
-        <button class="btn btn-glass"><svg class="i"><use href="#i-check-circle"/></svg> Valider</button>
-        <button class="btn btn-glass" data-modal-open="modal-del2" style="color:var(--sent-neg)"><svg class="i"><use href="#i-trash"/></svg> Supprimer</button>
+        <form method="post" action="{% url 'admin_reanalyze' review.id %}" class="inline">{% csrf_token %}<button type="submit" class="btn btn-primary" data-loading><svg class="i"><use href="#i-refresh"/></svg> Relancer l'analyse LSTM</button></form>
+        {% if review.flagged %}<form method="post" action="{% url 'admin_unflag_review' review.id %}" class="inline">{% csrf_token %}<button type="submit" class="btn btn-glass"><svg class="i"><use href="#i-check-circle"/></svg> Valider</button></form>{% endif %}
+        <button type="button" class="btn btn-glass" data-modal-open="modal-del2" style="color:var(--sent-neg)"><svg class="i"><use href="#i-trash"/></svg> Supprimer</button>
       </div>
     </div>
   </div>
@@ -100,7 +100,7 @@
       <h3 class="font-semibold mb-4">Métadonnées d'inférence</h3>
       <dl class="space-y-3 text-sm">
         <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-clock"/></svg> Temps de traitement</dt><dd class="font-semibold">{{ review.processing_ms }} ms</dd></div>
-        <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-cpu"/></svg> Modèle</dt><dd class="font-semibold">lstm-fr-v2.3</dd></div>
+        <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-cpu"/></svg> Modèle</dt><dd class="font-semibold">{{ review.model_version }}</dd></div>
         <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-check-circle"/></svg> Statut</dt><dd><span class="badge badge-pos">Analysé</span></dd></div>
         <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-calendar"/></svg> Analysé le</dt><dd class="font-semibold">{{ review.created_label }}</dd></div>
       </dl>
@@ -123,8 +123,8 @@
     <h3 class="cb-h3 mb-2">Supprimer cet avis ?</h3>
     <p class="cb-body mb-6">« {{ review.title }} » sera définitivement supprimé. Cette action est enregistrée dans les logs de modération.</p>
     <div class="flex gap-3 justify-end">
-      <button class="btn btn-ghost" data-modal-close>Annuler</button>
-      <a href="{% url 'admin_delete_review' review.id %}" class="btn btn-primary" style="background:linear-gradient(135deg,#f04438,#d92d20)">Supprimer</a>
+      <button class="btn btn-ghost" data-modal-close type="button">Annuler</button>
+      <form method="post" action="{% url 'admin_delete_review' review.id %}">{% csrf_token %}<button type="submit" class="btn btn-primary" style="background:linear-gradient(135deg,#f04438,#d92d20)">Supprimer</button></form>
     </div>
   </div>
 </div>

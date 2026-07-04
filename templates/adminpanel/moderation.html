@@ -28,8 +28,8 @@
       </div>
       <div class="flex lg:flex-col gap-2 shrink-0">
         <a href="{% url 'admin_review_detail' r.id %}" class="btn btn-glass btn-sm flex-1"><svg class="i !w-4 !h-4"><use href="#i-eye"/></svg> Examiner</a>
-        <button class="btn btn-glass btn-sm flex-1" style="color:var(--sent-pos)"><svg class="i !w-4 !h-4"><use href="#i-check"/></svg> Valider</button>
-        <a href="{% url 'admin_delete_review' r.id %}" class="btn btn-glass btn-sm flex-1" style="color:var(--sent-neg)"><svg class="i !w-4 !h-4"><use href="#i-trash"/></svg> Supprimer</a>
+        <form method="post" action="{% url 'admin_unflag_review' r.id %}" class="inline flex-1">{% csrf_token %}<button type="submit" class="btn btn-glass btn-sm w-full" style="color:var(--sent-pos)"><svg class="i !w-4 !h-4"><use href="#i-check"/></svg> Valider</button></form>
+        <form method="post" action="{% url 'admin_delete_review' r.id %}" class="inline flex-1">{% csrf_token %}<button type="submit" class="btn btn-glass btn-sm w-full" style="color:var(--sent-neg)"><svg class="i !w-4 !h-4"><use href="#i-trash"/></svg> Supprimer</button></form>
       </div>
     </div>
   </div>

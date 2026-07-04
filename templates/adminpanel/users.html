@@ -9,10 +9,10 @@
 {% block content %}
 <!-- Résumé -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" data-stagger>
-  <div class="glass glass-card rounded-3xl p-5"><p class="cb-h2 !text-2xl font-extrabold"><span data-count="3164"></span></p><p class="cb-caption mt-1">Clients</p></div>
-  <div class="glass glass-card rounded-3xl p-5"><p class="cb-h2 !text-2xl font-extrabold"><span data-count="4"></span></p><p class="cb-caption mt-1">Administrateurs</p></div>
-  <div class="glass glass-card rounded-3xl p-5"><p class="cb-h2 !text-2xl font-extrabold" style="color:var(--sent-pos)"><span data-count="3081"></span></p><p class="cb-caption mt-1">Comptes actifs</p></div>
-  <div class="glass glass-card rounded-3xl p-5"><p class="cb-h2 !text-2xl font-extrabold" style="color:var(--sent-neu)"><span data-count="87"></span></p><p class="cb-caption mt-1">Suspendus</p></div>
+  <div class="glass glass-card rounded-3xl p-5"><p class="cb-h2 !text-2xl font-extrabold"><span data-count="{{ user_stats.clients }}"></span></p><p class="cb-caption mt-1">Clients</p></div>
+  <div class="glass glass-card rounded-3xl p-5"><p class="cb-h2 !text-2xl font-extrabold"><span data-count="{{ user_stats.admins }}"></span></p><p class="cb-caption mt-1">Administrateurs</p></div>
+  <div class="glass glass-card rounded-3xl p-5"><p class="cb-h2 !text-2xl font-extrabold" style="color:var(--sent-pos)"><span data-count="{{ user_stats.actifs }}"></span></p><p class="cb-caption mt-1">Comptes actifs</p></div>
+  <div class="glass glass-card rounded-3xl p-5"><p class="cb-h2 !text-2xl font-extrabold" style="color:var(--sent-neu)"><span data-count="{{ user_stats.suspendus }}"></span></p><p class="cb-caption mt-1">Suspendus</p></div>
 </div>
 
 <div class="glass rounded-3xl overflow-hidden reveal">
@@ -38,10 +38,10 @@
               <div data-dropdown-menu class="glass glass-strong absolute right-0 mt-2 w-44 rounded-2xl p-2 z-40">
                 <a href="#" class="dropdown-link"><svg class="i"><use href="#i-eye"/></svg> Voir le profil</a>
                 <a href="#" class="dropdown-link"><svg class="i"><use href="#i-edit"/></svg> Modifier</a>
-                {% if u.status == 'actif' %}
-                <a href="#" class="dropdown-link" style="color:var(--sent-neu)"><svg class="i"><use href="#i-lock"/></svg> Suspendre</a>
-                {% else %}
-                <a href="#" class="dropdown-link" style="color:var(--sent-pos)"><svg class="i"><use href="#i-check"/></svg> Réactiver</a>
+                {% if u.status == 'actif' and u.role != 'admin' %}
+                <form method="post" action="{% url 'admin_user_suspend' u.id %}">{% csrf_token %}<button type="submit" class="dropdown-link w-full text-left" style="color:var(--sent-neu)"><svg class="i"><use href="#i-lock"/></svg> Suspendre</button></form>
+                {% elif u.status == 'suspendu' %}
+                <form method="post" action="{% url 'admin_user_activate' u.id %}">{% csrf_token %}<button type="submit" class="dropdown-link w-full text-left" style="color:var(--sent-pos)"><svg class="i"><use href="#i-check"/></svg> Réactiver</button></form>
                 {% endif %}
               </div>
             </div>

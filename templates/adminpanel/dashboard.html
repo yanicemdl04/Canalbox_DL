@@ -17,7 +17,7 @@
       <span class="w-10 h-10 rounded-2xl grid place-items-center text-pink" style="background:var(--cb-pink-soft)"><svg class="i !w-5 !h-5"><use href="#i-message"/></svg></span>
       <span class="badge badge-pos !py-1"><svg class="i !w-3.5 !h-3.5"><use href="#i-trending-up"/></svg> +12%</span>
     </div>
-    <p class="cb-h2 !text-3xl font-extrabold"><span data-count="3180"></span></p>
+    <p class="cb-h2 !text-3xl font-extrabold"><span data-count="{{ stats.total }}"></span></p>
     <p class="cb-caption mt-1">Avis analysés</p>
   </div>
   <div class="glass glass-card rounded-3xl p-6">
@@ -31,9 +31,9 @@
   <div class="glass glass-card rounded-3xl p-6">
     <div class="flex items-center justify-between mb-3">
       <span class="w-10 h-10 rounded-2xl grid place-items-center text-pink" style="background:var(--cb-pink-soft)"><svg class="i !w-5 !h-5"><use href="#i-cpu"/></svg></span>
-      <span class="badge badge-neutral !py-1">LSTM v2.3</span>
+      <span class="badge badge-neutral !py-1">stub LSTM</span>
     </div>
-    <p class="cb-h2 !text-3xl font-extrabold"><span data-count="91" data-suffix="%"></span></p>
+    <p class="cb-h2 !text-3xl font-extrabold"><span data-count="{{ stats.avg_confidence_pct }}" data-suffix="%"></span></p>
     <p class="cb-caption mt-1">Confiance moyenne IA</p>
   </div>
   <div class="glass glass-card rounded-3xl p-6">
@@ -41,7 +41,7 @@
       <span class="w-10 h-10 rounded-2xl grid place-items-center" style="background:rgba(247,144,9,.14);color:#b25b00"><svg class="i !w-5 !h-5"><use href="#i-clock"/></svg></span>
       <span class="badge badge-pos !py-1"><svg class="i !w-3.5 !h-3.5"><use href="#i-trending-down"/></svg> -8%</span>
     </div>
-    <p class="cb-h2 !text-3xl font-extrabold"><span data-count="612" data-suffix=" ms"></span></p>
+    <p class="cb-h2 !text-3xl font-extrabold"><span data-count="{{ stats.avg_latency }}" data-suffix=" ms"></span></p>
     <p class="cb-caption mt-1">Latence moyenne</p>
   </div>
 </div>

@@ -11,22 +11,22 @@
 <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6" data-stagger>
   <div class="glass glass-card rounded-3xl p-6">
     <div class="flex items-center justify-between mb-3"><span class="cb-caption">Débit</span><svg class="i !w-4 !h-4 text-pink"><use href="#i-zap"/></svg></div>
-    <p class="cb-h2 !text-2xl font-extrabold"><span data-count="3180"></span></p>
+    <p class="cb-h2 !text-2xl font-extrabold"><span data-count="{{ log_stats.total }}"></span></p>
     <p class="cb-caption mt-1">Inférences totales</p>
   </div>
   <div class="glass glass-card rounded-3xl p-6">
     <div class="flex items-center justify-between mb-3"><span class="cb-caption">Fiabilité</span><svg class="i !w-4 !h-4" style="color:var(--sent-pos)"><use href="#i-check-circle"/></svg></div>
-    <p class="cb-h2 !text-2xl font-extrabold" style="color:var(--sent-pos)"><span data-count="99.4" data-suffix="%"></span></p>
+    <p class="cb-h2 !text-2xl font-extrabold" style="color:var(--sent-pos)"><span data-count="{{ log_stats.success_rate }}" data-suffix="%"></span></p>
     <p class="cb-caption mt-1">Taux de succès</p>
   </div>
   <div class="glass glass-card rounded-3xl p-6">
     <div class="flex items-center justify-between mb-3"><span class="cb-caption">Performance</span><svg class="i !w-4 !h-4" style="color:var(--sent-neu)"><use href="#i-clock"/></svg></div>
-    <p class="cb-h2 !text-2xl font-extrabold"><span data-count="612" data-suffix=" ms"></span></p>
+    <p class="cb-h2 !text-2xl font-extrabold"><span data-count="{{ log_stats.median_latency }}" data-suffix=" ms"></span></p>
     <p class="cb-caption mt-1">Latence médiane</p>
   </div>
   <div class="glass glass-card rounded-3xl p-6">
     <div class="flex items-center justify-between mb-3"><span class="cb-caption">Erreurs</span><svg class="i !w-4 !h-4" style="color:var(--sent-neg)"><use href="#i-alert"/></svg></div>
-    <p class="cb-h2 !text-2xl font-extrabold" style="color:var(--sent-neg)"><span data-count="19"></span></p>
+    <p class="cb-h2 !text-2xl font-extrabold" style="color:var(--sent-neg)"><span data-count="{{ log_stats.errors_30d }}"></span></p>
     <p class="cb-caption mt-1">Sur 30 jours</p>
   </div>
 </div>

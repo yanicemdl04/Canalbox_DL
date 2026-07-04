@@ -1,8 +1,6 @@
-"""Données de démonstration pour l'interface Canal Box.
+"""Jeux de données statiques pour la commande seed_canalbox.
 
-Ce module simule le backend (déjà défini côté projet) afin que l'interface
-soit entièrement navigable et présentable. Aucune logique métier réelle n'est
-implémentée ici : uniquement des jeux de données cohérents pour la démo.
+Les vues utilisent l'ORM Django — ce module n'est plus consommé à l'exécution.
 """
 from datetime import datetime, timedelta
 
