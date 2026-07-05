@@ -20,8 +20,7 @@ au backend. Design *Liquid Glass*, animations GSAP, contrôle d'accès strict pa
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate          # Linux / macOS
-# .venv\Scripts\activate           # Windows
+.venv\Scripts\activate           # Windows
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py seed_canalbox       # données initiales
