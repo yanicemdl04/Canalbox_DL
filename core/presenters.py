@@ -1,5 +1,6 @@
 """Conversion ORM → dicts compatibles avec les templates existants."""
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 
 FR_MONTHS_SHORT = [
@@ -48,6 +49,16 @@ def category_to_dict(category, review_count=None):
     }
 
 
+def get_sentiment_result(review):
+    """Accès sûr à la relation OneToOne inverse (absence lève RelatedObjectDoesNotExist)."""
+    if review is None:
+        return None
+    try:
+        return review.sentiment_result
+    except ObjectDoesNotExist:
+        return None
+
+
 def review_to_dict(review, *, include_ia=False):
     author = review.user.display_name
     data = {
@@ -64,18 +75,20 @@ def review_to_dict(review, *, include_ia=False):
         "status": "analysé" if review.status == review.Status.ANALYZED else "en attente",
     }
     if include_ia:
-        sr = getattr(review, "sentiment_result", None)
+        sr = get_sentiment_result(review)
         data["flagged"] = review.flagged
         if sr:
+            data["analysis_pending"] = False
             data["sentiment"] = sr.sentiment
             data["confidence"] = sr.confidence
             data["processing_ms"] = sr.processing_ms
             data["model_version"] = sr.model_version
         else:
-            data["sentiment"] = "neutre"
-            data["confidence"] = 0.0
-            data["processing_ms"] = 0
-            data["model_version"] = "—"
+            data["analysis_pending"] = True
+            data["sentiment"] = None
+            data["confidence"] = None
+            data["processing_ms"] = None
+            data["model_version"] = None
     return data
 
 

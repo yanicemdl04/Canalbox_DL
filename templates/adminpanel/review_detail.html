@@ -60,6 +60,16 @@
         <span class="badge badge-pink !bg-white/10 !text-pink-300 !border-white/10 ml-auto">v2.3</span>
       </div>
 
+      {% if review.analysis_pending %}
+      <div class="flex flex-col items-center text-center py-6 mb-2">
+        <span class="w-16 h-16 rounded-2xl grid place-items-center mb-4" style="background:rgba(255,255,255,.08);color:var(--cb-pink-light)">
+          <svg class="i !w-8 !h-8"><use href="#i-alert"/></svg>
+        </span>
+        <p class="text-white font-semibold mb-1">Analyse indisponible</p>
+        <p class="text-white/50 text-sm mb-5 max-w-xs">L'inférence LSTM n'a pas produit de résultat (erreur modèle ou environnement). Relancez l'analyse ci-contre.</p>
+        <form method="post" action="{% url 'admin_reanalyze' review.id %}">{% csrf_token %}<button type="submit" class="btn btn-primary" data-loading><svg class="i"><use href="#i-refresh"/></svg> Relancer l'analyse LSTM</button></form>
+      </div>
+      {% else %}
       <!-- Anneau de confiance -->
       <div class="flex flex-col items-center mb-6">
         <div class="relative">
@@ -93,15 +103,16 @@
           <div class="progress !bg-white/10 neu"><span data-progress="{{ probs.neutre }}" style="width:0"></span></div>
         </div>
       </div>
+      {% endif %}
     </section>
 
     <!-- Métadonnées d'inférence -->
     <section class="glass rounded-3xl p-6 reveal" data-delay="0.1">
       <h3 class="font-semibold mb-4">Métadonnées d'inférence</h3>
       <dl class="space-y-3 text-sm">
-        <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-clock"/></svg> Temps de traitement</dt><dd class="font-semibold">{{ review.processing_ms }} ms</dd></div>
-        <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-cpu"/></svg> Modèle</dt><dd class="font-semibold">{{ review.model_version }}</dd></div>
-        <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-check-circle"/></svg> Statut</dt><dd><span class="badge badge-pos">Analysé</span></dd></div>
+        <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-clock"/></svg> Temps de traitement</dt><dd class="font-semibold">{% if review.processing_ms %}{{ review.processing_ms }} ms{% else %}<span class="cb-caption">—</span>{% endif %}</dd></div>
+        <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-cpu"/></svg> Modèle</dt><dd class="font-semibold">{% if review.model_version %}{{ review.model_version }}{% else %}<span class="cb-caption">—</span>{% endif %}</dd></div>
+        <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-check-circle"/></svg> Statut</dt><dd>{% if review.analysis_pending %}<span class="badge badge-neg">Analyse manquante</span>{% else %}<span class="badge badge-pos">Analysé</span>{% endif %}</dd></div>
         <div class="flex justify-between items-center"><dt class="cb-body flex items-center gap-2"><svg class="i !w-4 !h-4 text-pink"><use href="#i-calendar"/></svg> Analysé le</dt><dd class="font-semibold">{{ review.created_label }}</dd></div>
       </dl>
     </section>

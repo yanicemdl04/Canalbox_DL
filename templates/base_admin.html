@@ -28,6 +28,16 @@
       </header>
 
       <main>
+        {% if not lstm_ready %}
+        <div class="glass rounded-2xl px-5 py-4 mb-6 flex items-start gap-3 border border-[color:var(--sent-neg)]/30" style="background:rgba(240,68,56,.08)">
+          <svg class="i !w-5 !h-5 shrink-0 mt-0.5" style="color:var(--sent-neg)"><use href="#i-alert"/></svg>
+          <div class="text-sm">
+            <p class="font-semibold text-[color:var(--sent-neg)]">Modèle LSTM indisponible</p>
+            <p class="cb-body mt-1">Relancez le serveur avec&nbsp;: <code class="text-xs bg-black/5 px-2 py-0.5 rounded">./run.sh</code></p>
+            {% if lstm_error %}<p class="cb-caption mt-1 opacity-70">{{ lstm_error }}</p>{% endif %}
+          </div>
+        </div>
+        {% endif %}
         {% block content %}{% endblock %}
       </main>
     </div>

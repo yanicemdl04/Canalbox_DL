@@ -9,6 +9,39 @@
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const hasGSAP = typeof window.gsap !== "undefined";
 
+  function registerScrollTrigger() {
+    if (hasGSAP && gsap.registerPlugin && window.ScrollTrigger) {
+      gsap.registerPlugin(ScrollTrigger);
+    }
+  }
+
+  function isInViewport(el) {
+    const r = el.getBoundingClientRect();
+    return r.top < window.innerHeight * 0.95 && r.bottom > 0;
+  }
+
+  /** Anime immédiatement si déjà visible, sinon au scroll. */
+  function scrollTriggerOrRun(el, animate, start = "top 90%") {
+    if (!hasGSAP || reduced) {
+      animate();
+      return;
+    }
+    if (isInViewport(el)) {
+      animate();
+      return;
+    }
+    if (!window.ScrollTrigger) {
+      animate();
+      return;
+    }
+    ScrollTrigger.create({
+      trigger: el,
+      start,
+      once: true,
+      onEnter: animate,
+    });
+  }
+
   /* ---------------------------------------------------- Orbes flottants */
   function floatOrbs() {
     if (!hasGSAP || reduced) return;
@@ -30,13 +63,23 @@
 
     els.forEach((el) => {
       const delay = parseFloat(el.dataset.delay || 0);
-      gsap.fromTo(el,
+      const reveal = () => gsap.fromTo(el,
         { opacity: 0, y: 34, filter: "blur(10px)" },
-        {
-          opacity: 1, y: 0, filter: "blur(0px)", duration: 0.9, delay, ease: "power3.out",
-          scrollTrigger: window.ScrollTrigger ? { trigger: el, start: "top 88%", once: true } : undefined,
-        }
+        { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.9, delay, ease: "power3.out" }
       );
+      if (isInViewport(el)) {
+        reveal();
+      } else if (window.ScrollTrigger) {
+        gsap.fromTo(el,
+          { opacity: 0, y: 34, filter: "blur(10px)" },
+          {
+            opacity: 1, y: 0, filter: "blur(0px)", duration: 0.9, delay, ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 88%", once: true },
+          }
+        );
+      } else {
+        reveal();
+      }
     });
   }
 
@@ -84,17 +127,20 @@
       const target = parseFloat(el.dataset.count);
       const decimals = (el.dataset.count.split(".")[1] || "").length;
       const suffix = el.dataset.suffix || "";
-      if (!hasGSAP || reduced) { el.textContent = target.toLocaleString("fr-FR") + suffix; return; }
+      if (!hasGSAP || reduced || Number.isNaN(target)) {
+        if (!Number.isNaN(target)) el.textContent = target.toLocaleString("fr-FR") + suffix;
+        return;
+      }
       const obj = { v: 0 };
-      gsap.to(obj, {
+      const run = () => gsap.to(obj, {
         v: target, duration: 1.6, ease: "power2.out",
-        scrollTrigger: window.ScrollTrigger ? { trigger: el, start: "top 92%", once: true } : undefined,
         onUpdate: () => {
           el.textContent = obj.v.toLocaleString("fr-FR", {
             minimumFractionDigits: decimals, maximumFractionDigits: decimals,
           }) + suffix;
         },
       });
+      scrollTriggerOrRun(el, run, "top 92%");
     });
   }
 
@@ -103,39 +149,44 @@
     document.querySelectorAll("[data-ring]").forEach((svg) => {
       const val = parseFloat(svg.dataset.ring); // 0..1
       const circle = svg.querySelector(".value");
-      if (!circle) return;
+      if (!circle || Number.isNaN(val)) return;
       const r = circle.r.baseVal.value;
       const c = 2 * Math.PI * r;
       circle.style.strokeDasharray = c;
       const offset = c * (1 - val);
-      if (!hasGSAP || reduced) { circle.style.strokeDashoffset = offset; return; }
-      circle.style.strokeDashoffset = c;
-      gsap.to(circle, {
-        strokeDashoffset: offset, duration: 1.4, ease: "power3.out",
-        scrollTrigger: window.ScrollTrigger ? { trigger: svg, start: "top 92%", once: true } : undefined,
-      });
+      if (!hasGSAP || reduced) {
+        circle.style.strokeDashoffset = offset;
+        return;
+      }
+      const run = () => {
+        circle.style.strokeDashoffset = c;
+        gsap.to(circle, { strokeDashoffset: offset, duration: 1.4, ease: "power3.out" });
+      };
+      scrollTriggerOrRun(svg, run, "top 92%");
     });
   }
 
   /* ---------------------------------------------------- Barres de graphique */
   function animateBars() {
-    if (!hasGSAP || reduced) {
-      document.querySelectorAll("[data-bar]").forEach((b) => (b.style.height = b.dataset.bar + "%"));
-      document.querySelectorAll("[data-progress]").forEach((p) => (p.style.width = p.dataset.progress + "%"));
-      return;
-    }
-    gsap.utils.toArray("[data-bar]").forEach((bar) => {
-      const h = bar.dataset.bar + "%";
-      gsap.fromTo(bar, { height: "0%" }, {
-        height: h, duration: 1.1, ease: "power3.out", delay: Math.random() * 0.2,
-        scrollTrigger: window.ScrollTrigger ? { trigger: bar, start: "top 96%", once: true } : undefined,
-      });
+    document.querySelectorAll("[data-bar]").forEach((bar) => {
+      const h = (parseFloat(bar.dataset.bar) || 0) + "%";
+      if (!hasGSAP || reduced) {
+        bar.style.height = h;
+        return;
+      }
+      scrollTriggerOrRun(bar, () => {
+        gsap.fromTo(bar, { height: "0%" }, { height: h, duration: 1.1, ease: "power3.out" });
+      }, "top 90%");
     });
-    gsap.utils.toArray("[data-progress]").forEach((p) => {
-      gsap.fromTo(p, { width: "0%" }, {
-        width: p.dataset.progress + "%", duration: 1.2, ease: "power3.out",
-        scrollTrigger: window.ScrollTrigger ? { trigger: p, start: "top 96%", once: true } : undefined,
-      });
+    document.querySelectorAll("[data-progress]").forEach((p) => {
+      const w = (parseFloat(p.dataset.progress) || 0) + "%";
+      if (!hasGSAP || reduced) {
+        p.style.width = w;
+        return;
+      }
+      scrollTriggerOrRun(p, () => {
+        gsap.fromTo(p, { width: "0%" }, { width: w, duration: 1.2, ease: "power3.out" });
+      }, "top 90%");
     });
   }
 
@@ -173,7 +224,7 @@
 
   function initServerToasts() {
     document.querySelectorAll("[data-server-toast]").forEach((n) => {
-      window.cbToast(n.dataset.message, n.dataset.level || "info");
+      window.cbToast(n.textContent.trim(), n.dataset.level || "info");
       n.remove();
     });
   }
@@ -273,6 +324,8 @@
           wrap.dataset.value = i + 1;
           if (hidden) hidden.value = i + 1;
           paint(i + 1);
+          const hint = document.getElementById("rating-hint");
+          if (hint) hint.textContent = `${i + 1} / 5 étoiles`;
           if (hasGSAP && !reduced) gsap.fromTo(star, { scale: 1 }, { scale: 1.35, duration: 0.25, yoyo: true, repeat: 1, ease: "power2.out" });
         });
       });
@@ -318,6 +371,7 @@
 
   /* ---------------------------------------------------- Init */
   function init() {
+    registerScrollTrigger();
     floatOrbs();
     revealOnScroll();
     staggerGroups();
@@ -335,6 +389,7 @@
     initCharCounter();
     initSkeletonDemo();
     pageEnter();
+    if (window.ScrollTrigger) ScrollTrigger.refresh();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

@@ -1,4 +1,4 @@
-"""Interface d'inférence LSTM — remplacer lstm_stub par le modèle réel plus tard."""
+"""Interface d'inférence LSTM — backend keras via ml_models/inference.py."""
 
 from dataclasses import dataclass
 

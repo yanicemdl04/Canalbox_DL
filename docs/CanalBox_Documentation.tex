@@ -1,0 +1,425 @@
+% Canal Box — Documentation technique du projet
+% Compiler : pdflatex CanalBox_Documentation.tex (×2 pour la TOC)
+% ou : python manage.py generate_project_tex
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{fontawesome5}
+\usepackage{listings}
+\usepackage{titlesec}
+\usepackage{parskip}
+
+\geometry{margin=2.2cm, top=2.8cm, bottom=2.5cm}
+
+% ── Palette Canal Box ──────────────────────────────────────────────
+\definecolor{cbPink}{HTML}{ff2d78}
+\definecolor{cbPinkDark}{HTML}{e0155f}
+\definecolor{cbPinkSoft}{HTML}{fff0f6}
+\definecolor{cbInk}{HTML}{0f0f12}
+\definecolor{cbSlate}{HTML}{4b5565}
+\definecolor{cbMist}{HTML}{98a2b3}
+\definecolor{cbPos}{HTML}{12b76a}
+\definecolor{cbNeg}{HTML}{f04438}
+\definecolor{cbNeu}{HTML}{f79009}
+\definecolor{cbGlass}{HTML}{f8f9fc}
+\definecolor{cbDark}{HTML}{1a1a1f}
+\definecolor{cbPurple}{HTML}{6941c6}
+
+% ── Hyperliens ─────────────────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=cbPink,
+  urlcolor=cbPinkDark,
+  citecolor=cbSlate,
+  pdftitle={Canal Box — Documentation},
+  pdfauthor={Équipe Deep Learning LSTM},
+}
+
+% ── En-têtes / pieds de page ───────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{cbSlate}Canal Box — Documentation technique}
+\fancyhead[R]{\small\color{cbPink}\thepage}
+\renewcommand{\headrulewidth}{2pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{cbPink}\leaders\hrule height \headrulewidth\hfill}}
+
+% ── Titres colorés ─────────────────────────────────────────────────
+\titleformat{\section}{\Large\bfseries\color{cbPink}}{}{0em}{}[\vspace{-0.3em}\color{cbPink}\titlerule]
+\titleformat{\subsection}{\large\bfseries\color{cbInk}}{}{0em}{}
+
+% ── Boîtes colorées ────────────────────────────────────────────────
+\newtcolorbox{archbox}[2][]{
+  enhanced, breakable,
+  colback=#2!8, colframe=#2,
+  fonttitle=\bfseries\color{white},
+  coltitle=white, title=#1,
+  attach boxed title to top left={yshift=-2mm, xshift=4mm},
+  boxed title style={colback=#2, sharp corners},
+  arc=4pt, boxrule=0.8pt,
+  left=8pt, right=8pt, top=10pt, bottom=8pt,
+}
+
+\newtcolorbox{infobox}[1][]{
+  enhanced, breakable,
+  colback=cbPinkSoft, colframe=cbPink,
+  fonttitle=\bfseries\color{cbPinkDark},
+  title={\faInfoCircle\ #1},
+  arc=4pt, boxrule=0.6pt,
+  left=8pt, right=8pt,
+}
+
+\newtcolorbox{warnbox}[1][]{
+  enhanced, breakable,
+  colback=cbNeg!8, colframe=cbNeg,
+  fonttitle=\bfseries\color{cbNeg},
+  title={\faShieldAlt\ #1},
+  arc=4pt, boxrule=0.6pt,
+}
+
+% ── Listings (arborescence) ─────────────────────────────────────────
+\lstset{
+  basicstyle=\ttfamily\small\color{cbSlate},
+  backgroundcolor=\color{cbGlass},
+  frame=single, rulecolor=\color{cbMist},
+  frameround=tttt, framesep=6pt,
+  breaklines=true, showstringspaces=false,
+  columns=fullflexible, keepspaces=true,
+}
+
+% ── Badges sentiment ───────────────────────────────────────────────
+\newcommand{\badgePos}{\tikz[baseline=(X.base)]{\node[fill=cbPos, text=white, rounded corners=2pt, inner xsep=5pt, inner ysep=2pt, font=\small\bfseries] (X) {Positif};}}
+\newcommand{\badgeNeg}{\tikz[baseline=(X.base)]{\node[fill=cbNeg, text=white, rounded corners=2pt, inner xsep=5pt, inner ysep=2pt, font=\small\bfseries] (X) {Négatif};}}
+\newcommand{\badgeNeu}{\tikz[baseline=(X.base)]{\node[fill=cbNeu, text=white, rounded corners=2pt, inner xsep=5pt, inner ysep=2pt, font=\small\bfseries] (X) {Neutre};}}
+
+% ── Page de titre ──────────────────────────────────────────────────
+\newcommand{\makecover}{
+  \begin{titlepage}
+    \begin{tikzpicture}[remember picture, overlay]
+      \fill[cbDark] (current page.south west) rectangle (current page.north east);
+      \fill[cbPink, opacity=0.35] ([xshift=14cm, yshift=24cm]current page.south west) circle (3.5cm);
+      \fill[cbPink, opacity=0.15] ([xshift=2cm, yshift=4cm]current page.south west) circle (2.2cm);
+    \end{tikzpicture}
+    \centering
+    \vspace*{2.5cm}
+    {\tikz{\node[fill=cbPink, rounded corners=8pt, minimum width=1.8cm, minimum height=1.8cm, font=\Huge\bfseries\color{white}] {C};}}\\[1.2cm]
+    {\Huge\bfseries\color{white} Canal Box}\\[0.4cm]
+    {\Large\color{cbPinkSoft} Plateforme d'avis clients · Analyse LSTM}\\[1.5cm]
+    {\large\color{cbMist} Documentation technique du projet}\\[0.3cm]
+    {\color{cbMist} Examen Deep Learning — Cahier des charges v1.1}\\[0.2cm]
+    {\color{cbMist} Juillet 2026}\\[2cm]
+    \begin{tikzpicture}
+      \foreach \x/\lbl/\col in {0/Django 5.2/cbPink, 2.2/SQLite/cbSlate, 4.4/LSTM/cbPos, 6.6/Liquid Glass/cbNeu} {
+        \node[fill=\col, text=white, rounded corners=3pt, inner xsep=8pt, inner ysep=4pt, font=\small\bfseries] at (\x,0) {\lbl};
+      }
+    \end{tikzpicture}
+    \vfill
+    {\small\color{cbMist} Équipe Deep Learning LSTM · Usage académique}
+  \end{titlepage}
+}
+
+% ═══════════════════════════════════════════════════════════════════
+\begin{document}
+\makecover
+\tableofcontents
+\newpage
+
+% ── 1. Présentation ────────────────────────────────────────────────
+\section{Présentation du projet}
+
+Canal Box est une plateforme simulée d'avis clients pour un opérateur de services
+numériques (internet fibre, décodeur TV, assistance client, facturation).
+Chaque avis soumis est automatiquement analysé par un réseau \textbf{LSTM} qui prédit
+la polarité du texte : \badgePos\ \badgeNeg\ \badgeNeu.
+
+\begin{table}[h]
+  \centering
+  \renewcommand{\arraystretch}{1.4}
+  \begin{tabularx}{\textwidth}{>{\bfseries\color{cbPink}}l X}
+    \toprule
+    \rowcolor{cbPink}\color{white}Objectif & \color{white}\bfseries Description \\
+    \midrule
+    Collecte & Permettre aux clients de publier et consulter des avis \\
+    Analyse IA & Classifier automatiquement chaque avis via LSTM \\
+    Administration & Tableau de bord, modération, logs, exports CSV/PDF \\
+    Confidentialité IA & Résultats LSTM visibles \textbf{uniquement} par les administrateurs \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Objectifs principaux}
+\end{table}
+
+% ── 2. Architecture ────────────────────────────────────────────────
+\section{Architecture technique}
+
+L'application repose sur une architecture \textbf{monolithique Django} : templates,
+logique métier, inférence LSTM et persistance SQLite dans un seul projet.
+
+\begin{center}
+\begin{tikzpicture}[
+  layer/.style={rectangle, rounded corners=6pt, minimum width=12cm, minimum height=1.1cm, align=center, font=\small},
+  arr/.style={-{Stealth[length=3mm]}, thick, cbPink}
+]
+  \node[layer, fill=cbPinkSoft, draw=cbPink, text=cbInk] (pres) at (0,4)
+    {\textbf{Présentation}\quad|\quad Templates Django · Tailwind · GSAP · Liquid Glass};
+  \node[layer, fill=cbGlass, draw=cbSlate, text=cbInk] (met) at (0,2.5)
+    {\textbf{Métier}\quad|\quad views.py · review\_service · stats\_service · presenters};
+  \node[layer, fill=cbPos!12, draw=cbPos, text=cbInk] (ia) at (0,1)
+    {\textbf{Intelligence artificielle}\quad|\quad lstm\_service → lstm\_stub / lstm\_keras (.h5)};
+  \node[layer, fill=blue!6, draw=blue!50, text=cbInk] (data) at (0,-0.5)
+    {\textbf{Données}\quad|\quad SQLite · User · Category · Review · SentimentResult · InferenceLog};
+  \draw[arr] (pres) -- (met);
+  \draw[arr] (met) -- (ia);
+  \draw[arr] (ia) -- (data);
+\end{tikzpicture}
+\end{center}
+
+\begin{table}[h]
+  \centering
+  \renewcommand{\arraystretch}{1.35}
+  \begin{tabularx}{\textwidth}{>{\bfseries}l >{\ttfamily\small}l X}
+    \toprule
+    \rowcolor{cbInk}\color{white}Composant & \color{white}\bfseries Technologie & \color{white}\bfseries Rôle \\
+    \midrule
+    Backend & Django 5.2 + ORM & Vues, auth, services métier \\
+    Base de données & SQLite & Persistance locale des avis et résultats IA \\
+    Frontend & Django Templates + Tailwind & Interface Liquid Glass responsive \\
+    Animations & GSAP + ScrollTrigger & Transitions et micro-interactions \\
+    IA (actif) & lstm\_stub.py & Heuristiques FR en attendant le modèle \\
+    IA (futur) & lstm\_keras.py + .h5 & Modèle TensorFlow/Keras entraîné \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Stack technologique}
+\end{table}
+
+% ── 3. Flux ────────────────────────────────────────────────────────
+\section{Flux de données — soumission d'un avis}
+
+À chaque soumission, le pipeline suivant s'exécute de manière transparente pour le client :
+
+\begin{enumerate}[leftmargin=*, itemsep=6pt]
+  \item[\tikz{\node[circle, fill=cbPink, text=white, font=\bfseries\small, minimum size=6mm]{1};}]
+    \textbf{Client} — Rédige un avis (titre, texte, note 1–5, catégorie)
+  \item[\tikz{\node[circle, fill=cbSlate, text=white, font=\bfseries\small, minimum size=6mm]{2};}]
+    \textbf{Backend} — Enregistre en base (\texttt{status: pending})
+  \item[\tikz{\node[circle, fill=cbPos, text=white, font=\bfseries\small, minimum size=6mm]{3};}]
+    \textbf{LSTM} — Analyse le texte → sentiment + score de confiance
+  \item[\tikz{\node[circle, fill=cbSlate, text=white, font=\bfseries\small, minimum size=6mm]{4};}]
+    \textbf{Backend} — Met à jour (\texttt{status: analyzed}) + log d'inférence
+  \item[\tikz{\node[circle, fill=cbPinkSoft, draw=cbPink, text=cbPink, font=\bfseries\small, minimum size=6mm]{5};}]
+    \textbf{Client} — Voit l'avis publié \textbf{sans} étiquette de sentiment
+  \item[\tikz{\node[circle, fill=cbDark, text=white, font=\bfseries\small, minimum size=6mm]{6};}]
+    \textbf{Administrateur} — Consulte sentiment, confiance, stats et modération
+\end{enumerate}
+
+\newpage
+
+% ── 4. Modèle de données ───────────────────────────────────────────
+\section{Modèle de données}
+
+\begin{table}[h]
+  \centering
+  \renewcommand{\arraystretch}{1.4}
+  \begin{tabularx}{\textwidth}{>{\ttfamily\small}l >{\ttfamily\small}l X}
+    \toprule
+    \rowcolor{cbPinkDark}\color{white}\bfseries Table & \color{white}\bfseries Champs clés & \color{white}\bfseries Description \\
+    \midrule
+    users & email, role, plan, status & Comptes client et administrateur \\
+    categories & name, slug, description, icon & Services Canal Box évaluables \\
+    reviews & user\_id, title, content, rating, status & Avis clients soumis \\
+    sentiment\_results & sentiment, confidence, prob\_* & Résultat LSTM par avis \\
+    inference\_logs & status, latency\_ms, model\_version & Journal des inférences \\
+    \bottomrule
+  \end{tabularx}
+  \caption{Schéma relationnel (SQLite / ORM Django)}
+\end{table}
+
+\begin{archbox}[User]{cbPurple}
+  \texttt{role} : \texttt{client} | \texttt{admin} \quad
+  \texttt{status} : \texttt{actif} | \texttt{suspendu}
+\end{archbox}
+
+\begin{archbox}[Review → SentimentResult (1:1)]{cbPos}
+  \texttt{status} : \texttt{pending} → \texttt{analyzed} \quad
+  \texttt{flagged} : signalé si confiance $<$ seuil minimal
+\end{archbox}
+
+% ── 5. Structure ───────────────────────────────────────────────────
+\section{Structure des dossiers}
+
+\begin{lstlisting}
+canalbox/              --> settings.py, urls.py, wsgi.py
+core/
+  models.py            --> User, Category, Review, SentimentResult
+  views.py             --> 30+ vues (public, client, admin)
+  presenters.py        --> ORM -> dicts pour templates
+  services/
+    review_service.py  --> Creation avis + inference LSTM
+    stats_service.py   --> Statistiques dashboard admin
+  ml/
+    lstm_service.py    --> Interface d'inference
+    lstm_stub.py       --> Stub heuristique (actif)
+    lstm_keras.py      --> Branche modele reel (a venir)
+  management/commands/
+    seed_canalbox.py   --> Jeu de donnees initial
+templates/             --> public/, client/, adminpanel/, partials/
+static/                --> canalbox.css, canalbox.js
+ml_models/             --> lstm_sentiment.h5 (a venir)
+docs/                  --> Documentation PDF et LaTeX
+\end{lstlisting}
+
+% ── 6. Pages ───────────────────────────────────────────────────────
+\section{Pages de l'application}
+
+\subsection{Espace public}
+
+\begin{table}[h]
+  \centering
+  \small
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabularx}{\textwidth}{>{\ttfamily}l X >{\bfseries\color{cbPurple}}l}
+    \toprule
+    \rowcolor{cbPurple}\color{white}\bfseries URL & \color{white}\bfseries Page & \color{white}\bfseries Accès \\
+    \midrule
+    / & Landing — présentation Canal Box & Tous \\
+    /connexion/ & Connexion e-mail / mot de passe & Visiteurs \\
+    /inscription/ & Création de compte client & Visiteurs \\
+    /mot-de-passe-oublie/ & Réinitialisation mot de passe & Visiteurs \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{Espace client}
+
+\begin{table}[h]
+  \centering
+  \small
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabularx}{\textwidth}{>{\ttfamily}l X >{\bfseries\color{cbPink}}l}
+    \toprule
+    \rowcolor{cbPink}\color{white}\bfseries URL & \color{white}\bfseries Page & \color{white}\bfseries Accès \\
+    \midrule
+    /espace/ & Tableau de bord personnel & Client \\
+    /espace/avis/ & Liste, recherche, filtres, pagination & Client \\
+    /espace/avis/nouveau/ & Formulaire de soumission d'avis & Client \\
+    /espace/avis/\textless id\textgreater/ & Détail d'un avis (sans IA) & Client \\
+    /espace/profil/ & Profil et statistiques & Client \\
+    /espace/profil/modifier/ & Modification du profil & Client \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection{Console administrateur}
+
+\begin{table}[h]
+  \centering
+  \small
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabularx}{\textwidth}{>{\ttfamily}l X >{\bfseries\color{cbInk}}l}
+    \toprule
+    \rowcolor{cbInk}\color{white}\bfseries URL & \color{white}\bfseries Page & \color{white}\bfseries Accès \\
+    \midrule
+    /administration/ & Dashboard KPI + graphiques sentiments & Admin \\
+    /administration/avis/ & Liste avec sentiment \& confiance LSTM & Admin \\
+    /administration/avis/\textless id\textgreater/ & Détail + distribution softmax & Admin \\
+    /administration/moderation/ & Avis signalés (confiance faible) & Admin \\
+    /administration/utilisateurs/ & Gestion comptes (suspendre) & Admin \\
+    /administration/categories/ & CRUD catégories de services & Admin \\
+    /administration/logs/ & Journal inférences (latence, erreurs) & Admin \\
+    /administration/exports/csv/ & Export CSV des avis analysés & Admin \\
+    /administration/exports/pdf/ & Export rapport analytique & Admin \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\newpage
+
+% ── 7. Sécurité ────────────────────────────────────────────────────
+\section{Règles de sécurité \& rôles}
+
+\begin{warnbox}[Règle fondamentale — cahier des charges]
+  Les données IA (\texttt{sentiment}, \texttt{confidence}, logs, statistiques LSTM) ne sont
+  \textbf{jamais} transmises aux templates client. Seuls les administrateurs y accèdent.
+\end{warnbox}
+
+\begin{table}[h]
+  \centering
+  \renewcommand{\arraystretch}{1.35}
+  \begin{tabularx}{\textwidth}{>{\bfseries\color{cbNeg}}l X}
+    \toprule
+    \rowcolor{cbNeg}\color{white}Règle & \color{white}\bfseries Implémentation \\
+    \midrule
+    IA invisible côté client & \texttt{review\_to\_dict(include\_ia=False)} \\
+    Accès admin protégé & Décorateur \texttt{admin\_required} + \texttt{role == admin} \\
+    Comptes suspendus & Vérification \texttt{status} avant chaque action \\
+    Seuil de confiance & \texttt{MIN\_CONFIDENCE\_THRESHOLD} → flagged automatique \\
+    Validation entrées & Longueur min titre/contenu, note 1–5, e-mail unique \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% ── 8. LSTM ────────────────────────────────────────────────────────
+\section{Intégration du modèle LSTM}
+
+Le stub actuel (\texttt{lstm\_stub.py}) utilise des heuristiques sur mots-clés français.
+Pour brancher le modèle entraîné par le pôle IA :
+
+\begin{infobox}[Étapes d'intégration]
+\begin{enumerate}[leftmargin=*, nosep]
+  \item Exporter le modèle depuis Jupyter (format \texttt{.h5} ou SavedModel)
+  \item Placer le fichier dans \texttt{ml\_models/lstm\_sentiment.h5}
+  \item Implémenter \texttt{predict()} dans \texttt{core/ml/lstm\_keras.py}
+  \item Changer \texttt{LSTM\_BACKEND = 'keras'} dans \texttt{canalbox/settings.py}
+\end{enumerate}
+\end{infobox}
+
+\textbf{Contrainte cahier des charges :} temps d'inférence $<$ 3 secondes par avis.
+
+% ── 9. Installation ────────────────────────────────────────────────
+\section{Installation \& commandes}
+
+\begin{table}[h]
+  \centering
+  \renewcommand{\arraystretch}{1.35}
+  \begin{tabularx}{\textwidth}{>{\ttfamily\small}l X}
+    \toprule
+    \rowcolor{cbPos}\color{white}\bfseries Commande & \color{white}\bfseries Description \\
+    \midrule
+    pip install -r requirements.txt & Installer les dépendances \\
+    python manage.py migrate & Créer les tables SQLite \\
+    python manage.py seed\_canalbox & Insérer données de démonstration \\
+    python manage.py runserver & Lancer le serveur de développement \\
+    python manage.py generate\_project\_pdf & Régénérer le PDF \\
+    pdflatex CanalBox\_Documentation.tex & Compiler ce document LaTeX \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{infobox}[Comptes de démonstration]
+  \textbf{Client} : \texttt{yanice.client@canalbox.cd} \\
+  \textbf{Admin} : \texttt{david.admin@canalbox.cd} \\
+  Mot de passe : \texttt{demo1234}
+\end{infobox}
+
+\vfill
+\begin{center}
+  \color{cbMist}\small
+  \rule{0.3\textwidth}{2pt}\\[0.5em]
+  © 2026 Canal Box — Équipe Deep Learning LSTM\\
+  Document confidentiel — Usage académique
+\end{center}
+
+\end{document}

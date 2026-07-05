@@ -20,7 +20,7 @@
         <div class="flex items-center gap-2 mb-3 flex-wrap">
           <span class="badge badge-neg"><svg class="i !w-3.5 !h-3.5"><use href="#i-alert"/></svg> Signalé</span>
           <span class="badge badge-neutral"><svg class="i !w-3.5 !h-3.5 text-pink"><use href="#{{ r.category.slug|cat_icon }}"/></svg> {{ r.category.name }}</span>
-          <span class="badge {{ r.sentiment|sentiment_badge }}"><span class="badge-dot"></span>{{ r.sentiment|sentiment_label }} · {{ r.confidence|pct }}%</span>
+          <span class="badge {{ r.sentiment|sentiment_badge }}"><span class="badge-dot"></span>{{ r.sentiment|sentiment_label }}{% if not r.analysis_pending %} · {{ r.confidence|pct }}%{% endif %}</span>
         </div>
         <h3 class="font-display font-bold text-lg mb-1">{{ r.title }}</h3>
         <p class="cb-body line-clamp-2 mb-3">{{ r.content }}</p>

@@ -39,6 +39,8 @@ def pct(value):
 
 @register.filter
 def sentiment_label(value):
+    if not value:
+        return "Non analysé"
     return {"positif": "Positif", "negatif": "Négatif", "neutre": "Neutre"}.get(value, value)
 
 

@@ -54,7 +54,10 @@ def analyze_review(review: Review, *, force: bool = False) -> SentimentResult | 
             model_version=settings.LSTM_MODEL_VERSION,
             error_message=str(exc),
         )
-        raise
+        # Publier l'avis même si le LSTM échoue (réanalyse possible côté admin)
+        review.status = Review.Status.ANALYZED
+        review.save(update_fields=["status"])
+        return None
 
 
 def create_review(*, user, category, title: str, content: str, rating: int) -> Review:

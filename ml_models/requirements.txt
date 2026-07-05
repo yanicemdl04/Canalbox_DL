@@ -1,0 +1,3 @@
+# Dependances minimales pour charger le modele et lancer inference.py
+# Versions testees avec le modele exporte (Python 3.12, TensorFlow 2.21)
+tensorflow>=2.15,<2.22

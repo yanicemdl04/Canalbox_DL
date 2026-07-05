@@ -62,16 +62,20 @@
           <td>{% include "partials/stars.html" with rating=r.rating %}</td>
           <td><span class="badge {{ r.sentiment|sentiment_badge }}"><span class="badge-dot"></span>{{ r.sentiment|sentiment_label }}</span></td>
           <td>
+            {% if r.analysis_pending %}
+            <span class="cb-caption">—</span>
+            {% else %}
             <div class="flex items-center gap-2">
               <div class="progress w-16 {% if r.sentiment == 'positif' %}pos{% elif r.sentiment == 'negatif' %}neg{% else %}neu{% endif %}"><span style="width:{{ r.confidence|pct }}%"></span></div>
               <span class="text-sm font-semibold">{{ r.confidence|pct }}%</span>
             </div>
+            {% endif %}
           </td>
           <td><span class="cb-caption whitespace-nowrap">{{ r.created_label }}</span></td>
           <td>
             <div class="flex items-center gap-1 justify-end">
               <a href="{% url 'admin_review_detail' r.id %}" class="btn btn-ghost btn-icon !p-2" title="Consulter"><svg class="i !w-[18px] !h-[18px]"><use href="#i-eye"/></svg></a>
-              <a href="{% url 'admin_reanalyze' r.id %}" class="btn btn-ghost btn-icon !p-2" title="Réanalyser"><svg class="i !w-[18px] !h-[18px]"><use href="#i-refresh"/></svg></a>
+              <form method="post" action="{% url 'admin_reanalyze' r.id %}" class="inline">{% csrf_token %}<button type="submit" class="btn btn-ghost btn-icon !p-2" title="Réanalyser"><svg class="i !w-[18px] !h-[18px]"><use href="#i-refresh"/></svg></button></form>
               <button type="button" class="btn btn-ghost btn-icon !p-2 !text-[color:var(--sent-neg)]" title="Supprimer" data-modal-open="modal-del" data-del-url="{% url 'admin_delete_review' r.id %}" data-del-title="{{ r.title }}"><svg class="i !w-[18px] !h-[18px]"><use href="#i-trash"/></svg></button>
             </div>
           </td>

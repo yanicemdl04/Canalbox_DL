@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from core.demo_data import CATEGORIES, _AUTHORS, _TITLES
 from core.models import Category, InferenceLog, Review, SentimentResult, User
+from core.presenters import get_sentiment_result
 from core.services.review_service import analyze_review
 
 
@@ -127,7 +128,7 @@ class Command(BaseCommand):
             analyze_review(review)
 
             # Ajuster la confiance pour coller aux données de démo si le stub diverge
-            sr = review.sentiment_result
+            sr = get_sentiment_result(review)
             if sr:
                 SentimentResult.objects.filter(pk=sr.pk).update(
                     sentiment=expected_sentiment,

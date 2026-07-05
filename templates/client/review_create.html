@@ -15,34 +15,49 @@
     <p class="cb-subtitle mt-2">Votre retour aide Canal Box à améliorer ses services.</p>
   </div>
 
-  <form method="post" action="{% url 'client_review_create' %}" class="glass rounded-3xl p-6 sm:p-9 space-y-7 reveal">
+  <form method="post" action="{% url 'client_review_create' %}" class="glass rounded-3xl p-6 sm:p-9 space-y-7 reveal" id="review-form">
     {% csrf_token %}
+
+    {% if messages %}
+    <div class="space-y-2">
+      {% for message in messages %}
+      <div class="rounded-2xl px-4 py-3 text-sm font-medium {% if 'error' in message.tags %}bg-red-50 text-red-700 border border-red-200{% elif 'success' in message.tags %}bg-emerald-50 text-emerald-700 border border-emerald-200{% else %}bg-pink-50 text-pink-700 border border-pink-200{% endif %}">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
 
     <!-- Catégorie -->
     <div class="field !mb-0">
       <label>Service concerné</label>
+      {% if not categories %}
+      <p class="cb-body mt-2 text-[color:var(--sent-neg)]">Aucune catégorie en base — contactez l'administrateur.</p>
+      {% else %}
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-1">
         {% for cat in categories %}
         <label class="cb-radio-card">
-          <input type="radio" name="categorie" value="{{ cat.slug }}" {% if forloop.first %}checked{% endif %}>
+          <input type="radio" name="categorie" value="{{ cat.slug }}" required
+            {% if active_cat == cat.slug %}checked{% elif not active_cat and forloop.first %}checked{% endif %}>
           <span class="w-10 h-10 rounded-xl grid place-items-center text-pink mb-2" style="background:var(--cb-pink-soft)"><svg class="i !w-5 !h-5"><use href="#{{ cat.slug|cat_icon }}"/></svg></span>
           <span class="text-sm font-semibold">{{ cat.name }}</span>
         </label>
         {% endfor %}
       </div>
+      {% endif %}
     </div>
 
     <!-- Note étoiles -->
     <div class="field !mb-0">
-      <label>Votre note</label>
+      <label>Votre note <span class="text-[color:var(--sent-neg)]">*</span></label>
       <div class="flex items-center gap-4">
         <div data-star-input data-value="0" class="cb-star-input flex gap-1.5">
           {% for _ in "12345"|make_list %}
           <button type="button" aria-label="Étoile {{ forloop.counter }}"><svg class="i !w-8 !h-8"><use href="#i-star"/></svg></button>
           {% endfor %}
         </div>
-        <input type="hidden" name="rating" value="0">
-        <span class="cb-caption">Cliquez pour noter</span>
+        <input type="hidden" name="rating" id="rating-input" value="0">
+        <span class="cb-caption" id="rating-hint">Cliquez pour noter (obligatoire)</span>
       </div>
     </div>
 
@@ -65,8 +80,30 @@
     <hr class="hr-hair">
     <div class="flex flex-col sm:flex-row items-center gap-3 justify-end">
       <a href="{% url 'client_reviews' %}" class="btn btn-ghost w-full sm:w-auto">Annuler</a>
-      <button type="submit" class="btn btn-primary btn-lg w-full sm:w-auto" data-loading>Publier mon avis <svg class="i"><use href="#i-arrow-right"/></svg></button>
+      <button type="submit" class="btn btn-primary btn-lg w-full sm:w-auto" id="submit-review">Publier mon avis <svg class="i"><use href="#i-arrow-right"/></svg></button>
     </div>
   </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById('review-form')?.addEventListener('submit', function (e) {
+    var rating = parseInt(document.getElementById('rating-input')?.value || '0', 10);
+    if (rating < 1 || rating > 5) {
+      e.preventDefault();
+      window.cbToast('Cliquez sur les étoiles pour attribuer une note.', 'error');
+      return;
+    }
+    var btn = document.getElementById('submit-review');
+    if (btn) { btn.classList.add('is-loading'); btn.disabled = true; }
+  });
+  document.querySelectorAll('[data-star-input]').forEach(function (wrap) {
+    wrap.addEventListener('click', function () {
+      var n = parseInt(wrap.dataset.value || '0', 10);
+      var hint = document.getElementById('rating-hint');
+      if (hint && n > 0) hint.textContent = n + ' / 5 étoiles';
+    });
+  });
+</script>
 {% endblock %}

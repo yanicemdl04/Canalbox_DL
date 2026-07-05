@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'core',
+    'core.apps.CoreConfig',
 ]
 
 AUTH_USER_MODEL = 'core.User'
@@ -67,6 +67,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.lstm_status',
             ],
         },
     },
@@ -128,8 +129,8 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# --- LSTM (stub par défaut — remplacer par "keras" quand le modèle est prêt) ---
-LSTM_BACKEND = 'stub'
-LSTM_MODEL_VERSION = 'lstm-stub-v1'
-LSTM_MODEL_PATH = BASE_DIR / 'ml_models' / 'lstm_sentiment.h5'
+# --- LSTM BiLSTM entraîné (TensorFlow — Python 3.12 requis) ---
+LSTM_BACKEND = 'keras'
+LSTM_MODEL_VERSION = 'lstm_sentiment_model'
+LSTM_MODEL_PATH = BASE_DIR / 'ml_models' / 'lstm_sentiment_model.keras'
 MIN_CONFIDENCE_THRESHOLD = 0.65

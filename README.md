@@ -12,7 +12,10 @@ au backend. Design *Liquid Glass*, animations GSAP, contrôle d'accès strict pa
 |--------|-------------|
 | **Backend** | Django 5.2, ORM, SQLite |
 | **Frontend** | Django Templates, HTML5, Tailwind CSS (CDN), GSAP |
-| **IA** | Stub LSTM (`core/ml/`) — prêt pour modèle Keras `.h5` |
+| **IA** | BiLSTM `ml_models/lstm_sentiment_model.keras` — via `ml_models/inference.py` |
+
+> **Python 3.12 requis** (TensorFlow incompatible avec 3.14).
+> Recréer le venv : `uv venv .venv --python 3.12 && uv pip install -r requirements.txt`
 | **Auth** | Django Auth (e-mail + mot de passe), rôles client / admin |
 | **Design** | Liquid Glass, Lucide SVG, Inter / Manrope |
 
@@ -96,9 +99,10 @@ static/
   css/canalbox.css         Design system Liquid Glass
   js/canalbox.js           Animations GSAP
 docs/
-  CanalBox_Documentation.pdf   Documentation illustrée du projet
+  CanalBox_Documentation.pdf   Documentation illustrée (ReportLab)
+  CanalBox_Documentation.tex   Source LaTeX colorée du même document
 scripts/
-  generate_project_pdf.py  Régénérer le PDF de documentation
+  generate_project_pdf.py  Régénérer le PDF ReportLab
 ```
 
 ## Modèle de données
@@ -149,15 +153,27 @@ Les données IA (**sentiment, confiance, logs, statistiques LSTM**) ne sont tran
 | `/administration/exports/csv/` | Export CSV |
 | `/administration/exports/pdf/` | Export PDF |
 
-## Intégration du modèle LSTM
+## Modèle LSTM intégré
 
-1. Placer le fichier entraîné dans `ml_models/lstm_sentiment.h5`
-2. Implémenter `predict()` dans `core/ml/lstm_keras.py`
-3. Modifier `canalbox/settings.py` :
+Artefacts dans **`ml_models/`** (voir `ml_models/README.md`) :
 
-```python
-LSTM_BACKEND = 'keras'
-LSTM_MODEL_VERSION = 'lstm-fr-v2.3'
+| Fichier | Rôle |
+|---------|------|
+| `lstm_sentiment_model.keras` | Modèle Keras complet (vectorizer + BiLSTM) |
+| `inference.py` | Nettoyage texte + prédiction (point d'entrée) |
+| `label_mapping.json` | Correspondance index → label |
+
+Django appelle `predict_sentiment()` de `inference.py` (pré-chargé au démarrage dans `CoreConfig.ready()`).
+Les labels anglais (`negative` / `neutral` / `positive`) sont mappés en français pour la base.
+
+```bash
+# Test CLI avant intégration
+python ml_models/inference.py --text "La connexion est rapide."
+
+# Prérequis : Python 3.12 + TensorFlow 2.15–2.21
+uv venv .venv --python 3.12
+source .venv/bin/activate
+uv pip install -r requirements.txt
 ```
 
 ## Commandes utiles
@@ -168,13 +184,18 @@ python manage.py generate_project_pdf    # régénérer la documentation PDF
 python manage.py createsuperuser         # accès /django-admin/
 ```
 
-## Documentation PDF
+## Documentation
 
-Un document illustré et coloré est disponible dans `docs/CanalBox_Documentation.pdf`.
-Régénérez-le avec :
+| Fichier | Description |
+|---------|-------------|
+| `docs/CanalBox_Documentation.pdf` | PDF coloré (ReportLab) |
+| `docs/CanalBox_Documentation.tex` | Source LaTeX (même contenu, compilable) |
 
 ```bash
-python manage.py generate_project_pdf
+python manage.py generate_project_pdf    # PDF via ReportLab
+python manage.py generate_project_tex    # Compile le .tex (si pdflatex installé)
+# ou manuellement :
+cd docs && pdflatex CanalBox_Documentation.tex
 ```
 
 ## Palette Canal Box

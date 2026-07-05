@@ -50,7 +50,7 @@
   {% if messages %}
     <div style="display:none">
       {% for message in messages %}
-        <span data-server-toast data-message="{{ message }}" data-level="{{ message.tags|default:'info' }}"></span>
+        <span data-server-toast data-level="{{ message.tags|default:'info' }}">{{ message }}</span>
       {% endfor %}
     </div>
   {% endif %}

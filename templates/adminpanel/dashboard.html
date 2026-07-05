@@ -31,7 +31,7 @@
   <div class="glass glass-card rounded-3xl p-6">
     <div class="flex items-center justify-between mb-3">
       <span class="w-10 h-10 rounded-2xl grid place-items-center text-pink" style="background:var(--cb-pink-soft)"><svg class="i !w-5 !h-5"><use href="#i-cpu"/></svg></span>
-      <span class="badge badge-neutral !py-1">stub LSTM</span>
+      <span class="badge badge-neutral !py-1">{{ stats.total }} avis · BiLSTM</span>
     </div>
     <p class="cb-h2 !text-3xl font-extrabold"><span data-count="{{ stats.avg_confidence_pct }}" data-suffix="%"></span></p>
     <p class="cb-caption mt-1">Confiance moyenne IA</p>
@@ -134,7 +134,7 @@
           <p class="cb-caption">{{ r.category.name }} · {{ r.created_label }}</p>
         </div>
         <span class="badge {{ r.sentiment|sentiment_badge }}">{{ r.sentiment|sentiment_label }}</span>
-        <span class="cb-caption font-semibold hidden sm:block">{{ r.confidence|pct }}%</span>
+        <span class="cb-caption font-semibold hidden sm:block">{% if r.analysis_pending %}—{% else %}{{ r.confidence|pct }}%{% endif %}</span>
       </a>
       {% endfor %}
     </div>

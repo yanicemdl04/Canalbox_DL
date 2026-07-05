@@ -19,6 +19,7 @@ from .models import Category, InferenceLog, Review, SentimentResult
 from .presenters import (
     admin_user_to_dict,
     category_to_dict,
+    get_sentiment_result,
     inference_log_to_dict,
     probs_from_result,
     review_to_dict,
@@ -261,21 +262,30 @@ def client_review_detail(request, review_id):
 
 @active_user_required
 def client_review_create(request):
+    active_cat = request.GET.get("categorie", "")
+
     if request.method == "POST":
         title = request.POST.get("title", "").strip()
         content = request.POST.get("content", "").strip()
-        rating = int(request.POST.get("rating") or 0)
-        cat_slug = request.POST.get("categorie", "")
+        try:
+            rating = int(request.POST.get("rating") or 0)
+        except (TypeError, ValueError):
+            rating = 0
+        cat_slug = request.POST.get("categorie", "").strip()
         category = Category.objects.filter(slug=cat_slug).first()
+        if not category and cat_slug.isdigit():
+            category = Category.objects.filter(pk=int(cat_slug)).first()
 
-        if not category:
-            messages.error(request, "Veuillez choisir une catégorie.")
+        if not Category.objects.exists():
+            messages.error(request, "Aucune catégorie disponible. Lancez : python manage.py seed_canalbox")
+        elif not category:
+            messages.error(request, "Veuillez choisir une catégorie de service.")
         elif len(title) < 5:
             messages.error(request, "Le titre doit contenir au moins 5 caractères.")
         elif len(content) < 20:
             messages.error(request, "L'avis doit contenir au moins 20 caractères.")
         elif rating < 1 or rating > 5:
-            messages.error(request, "Veuillez attribuer une note entre 1 et 5 étoiles.")
+            messages.error(request, "Cliquez sur les étoiles pour noter entre 1 et 5.")
         else:
             create_review(
                 user=request.user,
@@ -286,9 +296,13 @@ def client_review_create(request):
             )
             messages.success(request, "Votre avis a été publié. Merci pour votre retour !")
             return redirect("client_reviews")
+        active_cat = cat_slug
 
     return render(request, "client/review_create.html", _base_ctx(
-        request, categories=_categories_with_counts()))
+        request,
+        categories=_categories_with_counts(),
+        active_cat=active_cat,
+    ))
 
 
 @active_user_required
@@ -366,7 +380,8 @@ def admin_review_detail(request, review_id):
     review = Review.objects.filter(pk=review_id).select_related(
         "user", "category", "sentiment_result",
     ).first()
-    probs = probs_from_result(review.sentiment_result) if review else None
+    sr = get_sentiment_result(review) if review else None
+    probs = probs_from_result(sr)
     return render(request, "adminpanel/review_detail.html", _base_ctx(
         request,
         review=_admin_review_dict(review) if review else None,
@@ -378,8 +393,24 @@ def admin_review_detail(request, review_id):
 @require_POST
 def admin_reanalyze(request, review_id):
     review = get_object_or_404(Review, pk=review_id)
-    reanalyze_review(review)
-    messages.success(request, f"Réanalyse LSTM relancée pour l'avis #{review_id}.")
+    result = reanalyze_review(review)
+    if result:
+        messages.success(request, f"Réanalyse LSTM relancée pour l'avis #{review_id}.")
+    else:
+        log = (
+            InferenceLog.objects.filter(review=review, status=InferenceLog.Status.ERROR)
+            .order_by("-id")
+            .first()
+        )
+        detail = (log.error_message if log else "") or "Erreur inconnue"
+        if "No module named 'tensorflow'" in detail:
+            messages.error(
+                request,
+                "TensorFlow absent : arrêtez le serveur, puis lancez "
+                "source .venv/bin/activate && python manage.py runserver 8888",
+            )
+        else:
+            messages.error(request, f"Réanalyse LSTM échouée : {detail}")
     return redirect("admin_review_detail", review_id=review_id)
 
 
@@ -489,7 +520,7 @@ def admin_export_csv(request):
     for r in Review.objects.filter(status=Review.Status.ANALYZED).select_related(
         "category", "sentiment_result",
     ):
-        sr = getattr(r, "sentiment_result", None)
+        sr = get_sentiment_result(r)
         writer.writerow([
             r.id, r.title, r.rating, r.category.name,
             sr.sentiment if sr else "",
