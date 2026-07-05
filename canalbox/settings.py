@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-ne!#s*@bc)7bfavy(6s!_$zdbl&5ig=#1(%5p29@za8_6vp$+q'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# Render : définir DJANGO_DEBUG=0 dans les variables d'environnement.
+DEBUG = os.environ.get('DJANGO_DEBUG', '1').lower() in ('1', 'true', 'yes')
 
 ALLOWED_HOSTS = [
     ".onrender.com",
@@ -62,10 +64,9 @@ MIDDLEWARE = [
 
 
 # WhiteNoise: serve static files in production (Render)
-# https://whitenoise.readthedocs.io/
-# Remarque: STATIC_URL/STATICFILES_DIRS sont aussi définis plus bas.
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 
@@ -135,7 +136,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Default primary key field type

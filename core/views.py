@@ -15,6 +15,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from .demo_data import DEMO_USERS
 from .models import Category, InferenceLog, Review, SentimentResult
 from .presenters import (
     admin_user_to_dict,
@@ -124,8 +125,8 @@ def login_view(request):
     demo = request.GET.get("demo")
     if demo in ("client", "admin"):
         email = (
-            "yanice.client@canalbox.cd" if demo == "client"
-            else "david.admin@canalbox.cd"
+            DEMO_USERS["client"]["email"] if demo == "client"
+            else DEMO_USERS["admin"]["email"]
         )
         user = User.objects.filter(email=email).first()
         if user:

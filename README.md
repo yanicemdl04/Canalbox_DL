@@ -37,7 +37,7 @@ Ouvrez **http://127.0.0.1:8000/**
 | Rôle | E-mail | Mot de passe |
 |------|--------|--------------|
 | **Client** | `yanice.client@canalbox.cd` | `demo1234` |
-| **Administrateur** | `david.admin@canalbox.cd` | `demo1234` |
+| **Administrateur** | `jelly.admin@canalbox.cd` | `demo1234` |
 
 Accès rapide : `/connexion/?demo=client` ou `/connexion/?demo=admin`
 

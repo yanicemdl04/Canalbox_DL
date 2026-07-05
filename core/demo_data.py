@@ -4,6 +4,8 @@ Les vues utilisent l'ORM Django — ce module n'est plus consommé à l'exécuti
 """
 from datetime import datetime, timedelta
 
+DEMO_PASSWORD = "demo1234"
+
 # --- Utilisateurs de démonstration -----------------------------------------
 DEMO_USERS = {
     "client": {
@@ -18,10 +20,10 @@ DEMO_USERS = {
     },
     "admin": {
         "id": 1,
-        "name": "David Débuze",
-        "email": "david.admin@canalbox.cd",
+        "name": "Jelly",
+        "email": "jelly.admin@canalbox.cd",
         "role": "admin",
-        "initials": "DD",
+        "initials": "JE",
         "plan": "Administrateur plateforme",
         "member_since": "Janvier 2025",
         "avatar_color": "from-neutral-800 to-neutral-600",
@@ -149,7 +151,7 @@ def admin_users():
         {"id": 7, "name": "Yanice Mundele", "initials": "YM", "email": "yanice.client@canalbox.cd", "role": "client", "status": "actif", "reviews": 12, "joined": "12 Mar 2025"},
         {"id": 8, "name": "Joël Lumpungu", "initials": "JL", "email": "joel.stone@canalbox.cd", "role": "client", "status": "actif", "reviews": 8, "joined": "03 Avr 2025"},
         {"id": 9, "name": "Junior Bakana", "initials": "JB", "email": "junior.bakana@canalbox.cd", "role": "client", "status": "suspendu", "reviews": 3, "joined": "18 Avr 2025"},
-        {"id": 1, "name": "David Débuze", "initials": "DD", "email": "david.admin@canalbox.cd", "role": "admin", "status": "actif", "reviews": 0, "joined": "05 Jan 2025"},
+        {"id": 1, "name": "Jelly", "initials": "JE", "email": "jelly.admin@canalbox.cd", "role": "admin", "status": "actif", "reviews": 0, "joined": "05 Jan 2025"},
         {"id": 10, "name": "Grâce Kabongo", "initials": "GK", "email": "grace.kabongo@canalbox.cd", "role": "client", "status": "actif", "reviews": 21, "joined": "27 Fév 2025"},
         {"id": 11, "name": "Estelle Dyese", "initials": "ED", "email": "estelle.dyese@canalbox.cd", "role": "client", "status": "actif", "reviews": 5, "joined": "09 Mai 2025"},
     ]

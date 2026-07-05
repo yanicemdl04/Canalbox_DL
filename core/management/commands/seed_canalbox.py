@@ -5,10 +5,13 @@ from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from core.demo_data import CATEGORIES, _AUTHORS, _TITLES
+from core.demo_data import CATEGORIES, DEMO_PASSWORD, DEMO_USERS, _AUTHORS, _TITLES
 from core.models import Category, InferenceLog, Review, SentimentResult, User
 from core.presenters import get_sentiment_result
 from core.services.review_service import analyze_review
+
+ADMIN_EMAIL = DEMO_USERS["admin"]["email"]
+CLIENT_EMAIL = DEMO_USERS["client"]["email"]
 
 
 class Command(BaseCommand):
@@ -20,6 +23,11 @@ class Command(BaseCommand):
             action="store_true",
             help="Supprime toutes les données métier avant de seed.",
         )
+        parser.add_argument(
+            "--accounts-only",
+            action="store_true",
+            help="Catégories + comptes démo uniquement (sans avis ni inférence LSTM).",
+        )
 
     def handle(self, *args, **options):
         if options["flush"]:
@@ -30,16 +38,26 @@ class Command(BaseCommand):
             Category.objects.all().delete()
             User.objects.all().delete()
 
-        if Category.objects.exists():
-            self.stdout.write(self.style.WARNING("Données déjà présentes — utilisez --flush pour réinitialiser."))
-            return
+        demo_ready = (
+            Category.objects.exists()
+            and User.objects.filter(email=ADMIN_EMAIL).exists()
+            and User.objects.filter(email=CLIENT_EMAIL).exists()
+        )
+        if demo_ready and not options["flush"]:
+            self.stdout.write(self.style.WARNING("Comptes démo déjà présents."))
+        else:
+            if not Category.objects.exists():
+                self._seed_categories()
+            self._ensure_demo_users()
 
-        self._seed_categories()
-        users = self._seed_users()
-        self._seed_reviews(users)
+        if not options["accounts_only"] and not Review.objects.exists():
+            authors = list(User.objects.filter(role=User.Role.CLIENT, status=User.Status.ACTIF))
+            if authors:
+                self._seed_reviews(authors)
+
         self.stdout.write(self.style.SUCCESS("Seed Canal Box terminé."))
-        self.stdout.write("  Client  : yanice.client@canalbox.cd / demo1234")
-        self.stdout.write("  Admin   : david.admin@canalbox.cd / demo1234")
+        self.stdout.write(f"  Client  : {CLIENT_EMAIL} / {DEMO_PASSWORD}")
+        self.stdout.write(f"  Admin   : {ADMIN_EMAIL} / {DEMO_PASSWORD}")
 
     def _seed_categories(self):
         for cat in CATEGORIES:
@@ -51,30 +69,43 @@ class Command(BaseCommand):
             )
         self.stdout.write(f"  {len(CATEGORIES)} catégories créées.")
 
-    def _seed_users(self):
-        admin = User.objects.create_user(
-            username="david",
-            email="david.admin@canalbox.cd",
-            password="demo1234",
-            first_name="David",
-            last_name="Débuze",
-            role=User.Role.ADMIN,
-            plan="Administrateur plateforme",
+    def _ensure_demo_users(self):
+        admin_data = DEMO_USERS["admin"]
+        admin, created = User.objects.get_or_create(
+            email=admin_data["email"],
+            defaults={
+                "username": "jelly",
+                "first_name": "Jelly",
+                "last_name": "",
+                "role": User.Role.ADMIN,
+                "plan": admin_data["plan"],
+            },
         )
-        admin.date_joined = timezone.make_aware(datetime(2025, 1, 5))
-        admin.save(update_fields=["date_joined"])
+        admin.username = "jelly"
+        admin.first_name = "Jelly"
+        admin.last_name = ""
+        admin.role = User.Role.ADMIN
+        admin.plan = admin_data["plan"]
+        admin.set_password(DEMO_PASSWORD)
+        if created:
+            admin.date_joined = timezone.make_aware(datetime(2025, 1, 5))
+        admin.save()
 
-        client = User.objects.create_user(
-            username="yanice",
-            email="yanice.client@canalbox.cd",
-            password="demo1234",
-            first_name="Yanice",
-            last_name="Mundele",
-            role=User.Role.CLIENT,
-            plan="Canal Box Fibre 200",
+        client_data = DEMO_USERS["client"]
+        client, created = User.objects.get_or_create(
+            email=client_data["email"],
+            defaults={
+                "username": "yanice",
+                "first_name": "Yanice",
+                "last_name": "Mundele",
+                "role": User.Role.CLIENT,
+                "plan": client_data["plan"],
+            },
         )
-        client.date_joined = timezone.make_aware(datetime(2025, 3, 12))
-        client.save(update_fields=["date_joined"])
+        client.set_password(DEMO_PASSWORD)
+        if created:
+            client.date_joined = timezone.make_aware(datetime(2025, 3, 12))
+        client.save()
 
         extra_clients = [
             ("Joël", "Lumpungu", "joel.stone@canalbox.cd", User.Status.ACTIF, 2025, 4, 3),
@@ -83,20 +114,22 @@ class Command(BaseCommand):
             ("Estelle", "Dyese", "estelle.dyese@canalbox.cd", User.Status.ACTIF, 2025, 5, 9),
         ]
         for first, last, email, status, y, m, d in extra_clients:
-            u = User.objects.create_user(
-                username=email.split("@")[0],
+            u, created = User.objects.get_or_create(
                 email=email,
-                password="demo1234",
-                first_name=first,
-                last_name=last,
-                role=User.Role.CLIENT,
-                status=status,
+                defaults={
+                    "username": email.split("@")[0],
+                    "first_name": first,
+                    "last_name": last,
+                    "role": User.Role.CLIENT,
+                    "status": status,
+                },
             )
-            u.date_joined = timezone.make_aware(datetime(y, m, d))
-            u.save(update_fields=["date_joined"])
+            u.set_password(DEMO_PASSWORD)
+            if created:
+                u.date_joined = timezone.make_aware(datetime(y, m, d))
+            u.save()
 
-        self.stdout.write(f"  {User.objects.count()} utilisateurs créés.")
-        return list(User.objects.filter(role=User.Role.CLIENT, status=User.Status.ACTIF))
+        self.stdout.write(f"  {User.objects.count()} utilisateurs prêts.")
 
     def _seed_reviews(self, authors):
         base = timezone.now()
@@ -127,16 +160,13 @@ class Command(BaseCommand):
 
             analyze_review(review)
 
-            # Ajuster la confiance pour coller aux données de démo si le stub diverge
             sr = get_sentiment_result(review)
             if sr:
                 SentimentResult.objects.filter(pk=sr.pk).update(
                     sentiment=expected_sentiment,
                     confidence=expected_conf,
                 )
-                sr.refresh_from_db()
 
-        # Log d'erreur simulé pour la démo
         last_review = Review.objects.order_by("-created_at").first()
         if last_review:
             InferenceLog.objects.create(
